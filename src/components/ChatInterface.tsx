@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
@@ -26,7 +27,6 @@ export const ChatInterface = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const { toast } = useToast();
 
-  // Fetch conversations on component mount
   useEffect(() => {
     const fetchConversations = async () => {
       try {
@@ -62,12 +62,7 @@ export const ChatInterface = () => {
   const handleSendMessage = async (content: string) => {
     const userMessage = { role: "user" as const, content };
 
-    // Update the active conversation with the new user message
-    const updatedConversation = {
-      ...activeConversation,
-      messages: [...activeConversation.messages, userMessage],
-    };
-
+    // Update conversation with user message
     setConversations((prevConversations) =>
       prevConversations.map((conv) =>
         conv.id === activeConversationId
@@ -78,37 +73,86 @@ export const ChatInterface = () => {
 
     setIsLoading(true);
 
-    const eventSource = new EventSource("http://localhost:8000/chat");
-
-    eventSource.onmessage = (event) => {
-      const botMessage = {
-        role: "assistant" as const,
-        content: event.data,
-      };
-
+    try {
+      // Create new assistant message
+      const assistantMessage = { role: "assistant" as const, content: "" };
+      
+      // Add empty assistant message to state
       setConversations((prevConversations) =>
         prevConversations.map((conv) =>
           conv.id === activeConversationId
-            ? { ...conv, messages: [...conv.messages, botMessage] }
+            ? { ...conv, messages: [...conv.messages, userMessage, assistantMessage] }
             : conv
         )
       );
-    };
 
-    eventSource.onerror = () => {
-      eventSource.close();
-      setIsLoading(false);
-    };
-
-    eventSource.onopen = () => {
-      fetch("http://localhost:8000/chat", {
+      // Send request to backend
+      const response = await fetch("http://localhost:8000/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: updatedConversation }),
+        body: JSON.stringify({
+          message: {
+            messages: [...activeConversation.messages, userMessage].map(({ role, content }) => ({
+              role,
+              content,
+            })),
+          },
+        }),
       });
-    };
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Create a new ReadableStream from the response body
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (!reader) {
+        throw new Error("No reader available");
+      }
+
+      let accumulatedContent = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          break;
+        }
+
+        // Decode the chunk and accumulate it
+        const chunk = decoder.decode(value);
+        accumulatedContent += chunk;
+
+        // Update the assistant's message with accumulated content
+        setConversations((prevConversations) =>
+          prevConversations.map((conv) =>
+            conv.id === activeConversationId
+              ? {
+                  ...conv,
+                  messages: conv.messages.map((msg, index) =>
+                    index === conv.messages.length - 1
+                      ? { ...msg, content: accumulatedContent }
+                      : msg
+                  ),
+                }
+              : conv
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error in chat:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleNewChat = () => {
