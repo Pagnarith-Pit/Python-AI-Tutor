@@ -55,6 +55,7 @@ async def chat(message: ChatMessage):
 
     return EventSourceResponse(event_generator())
 
+print("hello")
 # # generate function to create the responses from the model
 # def generate(client, input):
 #     completion = client.chat.completions.create(
