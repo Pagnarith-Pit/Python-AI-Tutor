@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
@@ -76,7 +75,7 @@ export const ChatInterface = () => {
       setConversations((prevConversations) =>
         prevConversations.map((conv) =>
           conv.id === activeConversationId
-            ? { ...conv, messages: [...conv.messages, userMessage, assistantMessage] }
+            ? { ...conv, messages: [...conv.messages, assistantMessage] }
             : conv
         )
       );
@@ -103,7 +102,6 @@ export const ChatInterface = () => {
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let accumulatedContent = "";
-      let isFirstChunk = true;
 
       if (!reader) {
         throw new Error("No reader available");
@@ -122,15 +120,7 @@ export const ChatInterface = () => {
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const data = line.slice(6);
-            
-            // Handle code block markers
-            if (isFirstChunk && data.trim().startsWith('```')) {
-              accumulatedContent = data;
-            } else {
-              accumulatedContent += data;
-            }
-            
-            isFirstChunk = false;
+            accumulatedContent += data;
             
             setConversations((prevConversations) =>
               prevConversations.map((conv) =>

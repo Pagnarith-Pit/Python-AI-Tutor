@@ -55,17 +55,17 @@ export const Message = ({ content, role, isLoading }: MessageProps) => {
   const formattedContent = formatContent(content);
 
   return (
-    <div className={cn("px-4 py-6 sm:px-6 lg:px-8", isUser ? "bg-white" : "bg-gray-50 border-t border-b border-gray-100")}>
+    <div className={cn("px-4 py-6 sm:px-6 lg:px-8 bg-white")}>
       <div className="mx-auto max-w-3xl flex gap-4">
         <div className={cn(
           "h-8 w-8 rounded-full flex items-center justify-center shrink-0",
           isUser ? "bg-purple-600 text-white" : "bg-purple-200 text-purple-900"
         )}>
-          {isUser ? "U" : "A"}
+          {isUser ? "U" : "H"}
         </div>
         <div className="flex-1 space-y-3">
           <div className="text-sm font-medium text-gray-800">
-            {isUser ? "You" : "Assistant"}
+            {isUser ? "You" : "Helper Buddy"}
           </div>
           {isLoading ? (
             <>
