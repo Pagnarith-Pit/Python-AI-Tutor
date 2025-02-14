@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { ConversationList } from "./ConversationList";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "./ui/use-toast";
+import {formatContent} from "./Message";
 
 interface Message {
   role: "user" | "assistant";
@@ -56,6 +57,8 @@ export const ChatInterface = () => {
     conversations.find((c) => c.id === activeConversationId) ||
     conversations[0];
 
+  const accumulatedContentRef = useRef("");
+
   const handleSendMessage = async (content: string) => {
     const userMessage = { role: "user" as const, content };
 
@@ -107,6 +110,8 @@ export const ChatInterface = () => {
         throw new Error("No reader available");
       }
 
+      let isFirstChunk = true;
+
       while (true) {
         const { done, value } = await reader.read();
 
@@ -115,24 +120,31 @@ export const ChatInterface = () => {
         }
 
         const chunk = decoder.decode(value);
+        // console.log(chunk);
         const lines = chunk.split('\n');
         
+      //Set the loading to false here
+      if (isFirstChunk) {
+        setIsLoading(false);
+        isFirstChunk = false;
+      }
+
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const data = line.slice(6);
             accumulatedContent += data;
-            
+            accumulatedContentRef.current = accumulatedContent;
             setConversations((prevConversations) =>
               prevConversations.map((conv) =>
                 conv.id === activeConversationId
                   ? {
-                      ...conv,
-                      messages: conv.messages.map((msg, index) =>
-                        index === conv.messages.length - 1
-                          ? { ...msg, content: accumulatedContent }
-                          : msg
-                      ),
-                    }
+                    ...conv,
+                    messages: conv.messages.map((msg, index) =>
+                      index === conv.messages.length - 1
+                        ? { ...msg, content: formatContent(accumulatedContentRef.current) }
+                        : msg
+                    ),
+                  }
                   : conv
               )
             );
@@ -147,9 +159,10 @@ export const ChatInterface = () => {
         description: "Failed to send message",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
-    }
+    } 
+    // finally {
+    //   setIsLoading(false);
+    // }
   };
 
   const handleNewChat = () => {

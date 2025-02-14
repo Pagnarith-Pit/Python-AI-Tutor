@@ -1,4 +1,3 @@
-
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -6,7 +5,6 @@ from sse_starlette.sse import EventSourceResponse
 from openai import OpenAI
 import asyncio
 import threading
-
 
 app = FastAPI()
 MODEL = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"

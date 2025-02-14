@@ -1,7 +1,7 @@
-
 import { useEffect, useRef } from "react";
 import { Message } from "./Message";
 import { LoadingMessage } from "./LoadingMessage";
+import { LoadingDots } from "./LoadingDots";
 
 interface MessageType {
   role: "user" | "assistant";
@@ -29,15 +29,10 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
       ) : (
         <>
           {messages.map((message, index) => (
-            <Message 
-              key={index} 
-              {...message} 
-              isLoading={isLoading && index === messages.length - 1}
-            />
+            <div key={index}>
+            <Message {...message} isLoading={isLoading && index === messages.length - 1 && message.role === "assistant"} />
+          </div>
           ))}
-          {isLoading && messages[messages.length - 1]?.content === "" && (
-            <LoadingMessage />
-          )}
           <div ref={bottomRef} />
         </>
       )}

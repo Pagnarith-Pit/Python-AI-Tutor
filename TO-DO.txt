@@ -12,6 +12,4 @@ Need to implement shorter term memory, then when session ends OR 10 minutes, sav
  
 2) Streaming messes up the output format
 
-3) Streaming now causes the user text to double up during waiting for the response
-
-4) Call API for fun facts while waiting
+3) Call API for fun facts while waiting

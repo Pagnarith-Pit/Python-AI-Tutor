@@ -23,6 +23,7 @@ export const LoadingFact = () => {
 
   return (
     <div className="text-gray-500 text-base">
+      I can use this section to also display the student's progress
       Please wait while I prepare your answer. For now, here's a fun fact: {funFact}
     </div>
   );

@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm';
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { tomorrow } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
 import { LoadingFact } from "./LoadingFact";
+import { LoadingMessage } from "./LoadingMessage";
 
 interface MessageProps {
   content: string;
@@ -32,7 +33,7 @@ const customStyle = {
   }
 };
 
-const formatContent = (content: string) => {
+export const formatContent = (content: string) => {
   // Replace spaces after punctuation
   return content
     .replace(/([.,!?])\s*(\S)/g, '$1 $2')
@@ -52,7 +53,7 @@ const formatContent = (content: string) => {
 
 export const Message = ({ content, role, isLoading }: MessageProps) => {
   const isUser = role === "user";
-  const formattedContent = formatContent(content);
+  // const formattedContent = formatContent(content);
 
   return (
     <div className={cn("px-4 py-6 sm:px-6 lg:px-8 bg-white")}>
@@ -69,7 +70,10 @@ export const Message = ({ content, role, isLoading }: MessageProps) => {
           </div>
           {isLoading ? (
             <>
-              <LoadingDots className="pt-2" />
+            <LoadingDots className="pt-2" />
+            <div className="mt-4">
+                <LoadingMessage /> 
+              </div>
             </>
           ) : (
             <div className="prose prose-sm max-w-none">
@@ -128,7 +132,8 @@ export const Message = ({ content, role, isLoading }: MessageProps) => {
                   },
                 }}
               >
-                {formattedContent}
+                {/* {formattedContent} */}
+                {content}
               </ReactMarkdown>
             </div>
           )}
