@@ -70,7 +70,6 @@ export const Message = ({ content, role, isLoading }: MessageProps) => {
           {isLoading ? (
             <>
               <LoadingDots className="pt-2" />
-              <LoadingFact />
             </>
           ) : (
             <div className="prose prose-sm max-w-none">

@@ -14,7 +14,6 @@ export const LoadingMessage = () => {
           <div className="text-sm font-medium text-gray-800">
             Loading Buddy
           </div>
-          <LoadingDots className="pt-2" />
           <LoadingFact />
         </div>
       </div>
