@@ -32,8 +32,27 @@ const customStyle = {
   }
 };
 
+const formatContent = (content: string) => {
+  // Replace spaces after punctuation
+  return content
+    .replace(/([.,!?])\s*(\S)/g, '$1 $2')
+    // Fix markdown bold/italic markers that might have spaces
+    .replace(/\*\s*\*/g, '**')
+    .replace(/\*\s+(\w)/g, '*$1')
+    .replace(/(\w)\s+\*/g, '$1*')
+    // Fix code block markers
+    .replace(/```\s+/g, '```')
+    // Ensure proper newlines before and after lists
+    .replace(/(\d+\.|\*)\s*/g, '\n$1 ')
+    // Fix multiple spaces
+    .replace(/\s+/g, ' ')
+    // Fix markdown headings
+    .replace(/#+\s*/g, (match) => match.trim() + ' ');
+};
+
 export const Message = ({ content, role, isLoading }: MessageProps) => {
   const isUser = role === "user";
+  const formattedContent = formatContent(content);
 
   return (
     <div className={cn("px-4 py-6 sm:px-6 lg:px-8", isUser ? "bg-white" : "bg-gray-50 border-t border-b border-gray-100")}>
@@ -58,11 +77,13 @@ export const Message = ({ content, role, isLoading }: MessageProps) => {
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  code: ({ node, inline, className, children, ...props }) => {
+                  code({ node, className, children, ...props }) {
                     const match = /language-(\w+)/.exec(className || '');
                     const language = match ? match[1] : '';
                     
-                    if (inline) {
+                    const isInline = !match && !className;
+                    
+                    if (isInline) {
                       return (
                         <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
                           {children}
@@ -85,30 +106,30 @@ export const Message = ({ content, role, isLoading }: MessageProps) => {
                       </SyntaxHighlighter>
                     );
                   },
-                  p: ({ node, ...props }) => (
-                    <p className="text-gray-700 leading-7 mb-4" {...props} />
-                  ),
-                  ul: ({ node, ...props }) => (
-                    <ul className="list-disc pl-6 mb-4 space-y-2" {...props} />
-                  ),
-                  ol: ({ node, ...props }) => (
-                    <ol className="list-decimal pl-6 mb-4 space-y-2" {...props} />
-                  ),
-                  li: ({ node, ...props }) => (
-                    <li className="mb-1" {...props} />
-                  ),
-                  h1: ({ node, ...props }) => (
-                    <h1 className="text-2xl font-semibold mt-8 mb-4" {...props} />
-                  ),
-                  h2: ({ node, ...props }) => (
-                    <h2 className="text-xl font-semibold mt-6 mb-3" {...props} />
-                  ),
-                  h3: ({ node, ...props }) => (
-                    <h3 className="text-lg font-semibold mt-5 mb-2" {...props} />
-                  ),
+                  p({ children }) {
+                    return <p className="text-gray-700 leading-7 mb-4">{children}</p>;
+                  },
+                  ul({ children }) {
+                    return <ul className="list-disc pl-6 mb-4 space-y-2">{children}</ul>;
+                  },
+                  ol({ children }) {
+                    return <ol className="list-decimal pl-6 mb-4 space-y-2">{children}</ol>;
+                  },
+                  li({ children }) {
+                    return <li className="mb-1">{children}</li>;
+                  },
+                  h1({ children }) {
+                    return <h1 className="text-2xl font-semibold mt-8 mb-4">{children}</h1>;
+                  },
+                  h2({ children }) {
+                    return <h2 className="text-xl font-semibold mt-6 mb-3">{children}</h2>;
+                  },
+                  h3({ children }) {
+                    return <h3 className="text-lg font-semibold mt-5 mb-2">{children}</h3>;
+                  },
                 }}
               >
-                {content}
+                {formattedContent}
               </ReactMarkdown>
             </div>
           )}
