@@ -1,9 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
-import { PlusCircle } from "lucide-react";
-import { Toggle } from "./ui/toggle";
 import { ConversationList } from "./ConversationList";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "./ui/use-toast";
@@ -62,7 +59,6 @@ export const ChatInterface = () => {
   const handleSendMessage = async (content: string) => {
     const userMessage = { role: "user" as const, content };
 
-    // Update conversation with user message
     setConversations((prevConversations) =>
       prevConversations.map((conv) =>
         conv.id === activeConversationId
@@ -74,10 +70,8 @@ export const ChatInterface = () => {
     setIsLoading(true);
 
     try {
-      // Create new assistant message
       const assistantMessage = { role: "assistant" as const, content: "" };
       
-      // Add empty assistant message to state
       setConversations((prevConversations) =>
         prevConversations.map((conv) =>
           conv.id === activeConversationId
@@ -86,48 +80,20 @@ export const ChatInterface = () => {
         )
       );
 
-      // Send request to backend
-      const response = await fetch("http://localhost:8000/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const eventSource = new EventSource(`http://localhost:8000/chat?message=${encodeURIComponent(JSON.stringify({
+        message: {
+          messages: [...activeConversation.messages, userMessage].map(({ role, content }) => ({
+            role,
+            content,
+          })),
         },
-        body: JSON.stringify({
-          message: {
-            messages: [...activeConversation.messages, userMessage].map(({ role, content }) => ({
-              role,
-              content,
-            })),
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      // Create a new ReadableStream from the response body
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      if (!reader) {
-        throw new Error("No reader available");
-      }
+      }))}`);
 
       let accumulatedContent = "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-
-        if (done) {
-          break;
-        }
-
-        // Decode the chunk and accumulate it
-        const chunk = decoder.decode(value);
-        accumulatedContent += chunk;
-
-        // Update the assistant's message with accumulated content
+      eventSource.onmessage = (event) => {
+        accumulatedContent += event.data;
+        
         setConversations((prevConversations) =>
           prevConversations.map((conv) =>
             conv.id === activeConversationId
@@ -142,7 +108,24 @@ export const ChatInterface = () => {
               : conv
           )
         );
-      }
+      };
+
+      eventSource.onerror = (error) => {
+        console.error("EventSource error:", error);
+        eventSource.close();
+        setIsLoading(false);
+        toast({
+          title: "Error",
+          description: "Connection lost. Please try again.",
+          variant: "destructive",
+        });
+      };
+
+      eventSource.addEventListener('done', () => {
+        eventSource.close();
+        setIsLoading(false);
+      });
+
     } catch (error) {
       console.error("Error in chat:", error);
       toast({
@@ -150,7 +133,6 @@ export const ChatInterface = () => {
         description: "Failed to send message",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };

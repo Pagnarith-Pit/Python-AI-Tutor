@@ -1,9 +1,10 @@
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 from openai import OpenAI
+import asyncio
 
 
 app = FastAPI()
@@ -13,7 +14,7 @@ API_KEY = "dummy"
 # Configure CORS with specific headers needed for SSE
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with your specific origin
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -30,23 +31,34 @@ def createClient(api_key):
     return client
 
 async def generate(client, input):
-    completion = client.chat.completions.create(
-        model=MODEL,
-        messages=input,
-        stream=True
-    )
+    try:
+        completion = client.chat.completions.create(
+            model=MODEL,
+            messages=input,
+            stream=True
+        )
 
-    async for chunk in completion:
-        if chunk.choices[0].delta.content is not None:
-            yield chunk.choices[0].delta.content
+        async for chunk in completion:
+            if chunk.choices[0].delta.content is not None:
+                yield chunk.choices[0].delta.content
+    except asyncio.CancelledError:
+        # Handle the cancellation gracefully
+        print("Connection was closed by the client")
+        raise
+    except Exception as e:
+        print(f"Error in generate: {str(e)}")
+        yield f"Error: {str(e)}"
 
 client = createClient(API_KEY)
 
 @app.post("/chat")
-async def chat(message: ChatMessage):
+async def chat(request: Request, message: ChatMessage):
     input = message.message['messages']
     
+    generator = generate(client, input)
+    
     return EventSourceResponse(
-        generate(client, input),
-        media_type="text/event-stream"
+        generator,
+        media_type="text/event-stream",
+        ping=20000  # Send a ping every 20 seconds to keep the connection alive
     )
