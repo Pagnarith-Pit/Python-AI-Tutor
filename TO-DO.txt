@@ -2,13 +2,16 @@
 2) Delete function: DONE
 3) Load Conversation from Database: DONE
 4) API to Real Model: DONE
-5) Formatting: the outputs are just strings for now.
+5) Formatting: the outputs are just strings for now: DONE
+6) Streaming: the output should stream out to be displayed: DONE
 
 Working:
 1) Delete function update: since there is a delay with saving, the conversation might not exist in the Database
 if the user uses it for less than 5 minutes.
 Need to implement shorter term memory, then when session ends OR 10 minutes, save it to persistent
  
-2) Streaming: the output should stream out to be displayed
+2) Streaming messes up the output format
 
-3) Call API for fun facts while waiting
+3) Streaming now causes the user text to double up during waiting for the response
+
+4) Call API for fun facts while waiting

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
@@ -76,7 +75,7 @@ export const ChatInterface = () => {
       setConversations((prevConversations) =>
         prevConversations.map((conv) =>
           conv.id === activeConversationId
-            ? { ...conv, messages: [...conv.messages, userMessage, assistantMessage] }
+            ? { ...conv, messages: [...conv.messages, assistantMessage] }
             : conv
         )
       );

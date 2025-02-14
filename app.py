@@ -37,7 +37,6 @@ async def generate(client, input):
 
     def worker():
         try:
-            # Note: Remove the await here because the method is synchronous
             completion = client.chat.completions.create(
                 model=MODEL,
                 messages=input,
@@ -46,27 +45,42 @@ async def generate(client, input):
             for chunk in completion:
                 content = chunk.choices[0].delta.content
                 if content is not None:
-                    # Schedule putting the token into the queue in a thread-safe way
                     asyncio.run_coroutine_threadsafe(queue.put(content), loop)
         except Exception as e:
             asyncio.run_coroutine_threadsafe(queue.put(f"Error: {str(e)}"), loop)
         finally:
-            # Signal the end of streaming by putting a sentinel value
+            # Signal the end of the stream
             asyncio.run_coroutine_threadsafe(queue.put(None), loop)
 
-    # Run the synchronous worker in a separate thread
+    # Start the worker thread
     threading.Thread(target=worker, daemon=True).start()
 
+    buffer = ""
+    streaming_started = False
+
     try:
-        # Asynchronously yield tokens from the queue as they arrive
         while True:
             token = await queue.get()
-            if token is None:  # End-of-stream sentinel
+            if token is None:  # End-of-stream
                 break
-            yield token
+
+            if not streaming_started:
+                buffer += token
+                if '</think>' in buffer:
+                    # Find the position right after the marker.
+                    marker_end = buffer.index('</think>') + len('</think>')
+                    # Start streaming: yield the text after the marker (if any)
+                    remainder = buffer[marker_end:]
+                    if remainder:
+                        yield remainder
+                    streaming_started = True
+            else:
+                yield token
+
     except asyncio.CancelledError:
         print("Connection was closed by the client")
         raise
+
 
 client = createClient(API_KEY)
 
