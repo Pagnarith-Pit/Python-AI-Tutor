@@ -18,17 +18,17 @@ const customStyle = {
   ...tomorrow,
   'code[class*="language-"]': {
     ...tomorrow['code[class*="language-"]'],
-    background: '#f5f5f5', // Soft gray background
-    color: '#374151', // Darker text for better contrast
+    background: '#f5f5f5',
+    color: '#374151',
   },
   'pre[class*="language-"]': {
     ...tomorrow['pre[class*="language-"]'],
-    background: '#f5f5f5', // Soft gray background
+    background: '#f5f5f5',
     padding: '1.25rem',
     borderRadius: '0.5rem',
     margin: '1.5rem 0',
-    maxHeight: '300px', // Set a maximum height for the code block
-    overflow: 'auto', // Enable scrolling if the content exceeds the maximum height
+    maxHeight: '300px',
+    overflow: 'auto',
   }
 };
 
@@ -36,7 +36,7 @@ export const Message = ({ content, role, isLoading }: MessageProps) => {
   const isUser = role === "user";
 
   return (
-    <div className={cn("px-4 py-6 sm:px-6 lg:px-8 bg-white")}>
+    <div className={cn("px-4 py-6 sm:px-6 lg:px-8", isUser ? "bg-white" : "bg-gray-50 border-t border-b border-gray-100")}>
       <div className="mx-auto max-w-3xl flex gap-4">
         <div className={cn(
           "h-8 w-8 rounded-full flex items-center justify-center shrink-0",
@@ -50,19 +50,19 @@ export const Message = ({ content, role, isLoading }: MessageProps) => {
           </div>
           {isLoading ? (
             <>
-            <LoadingDots className="pt-2" />
-            <LoadingFact />
+              <LoadingDots className="pt-2" />
+              <LoadingFact />
             </>
           ) : (
             <div className="prose prose-sm max-w-none">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
-                  code: ({ node, className, children, ...props }) => {
+                  code: ({ node, inline, className, children, ...props }) => {
                     const match = /language-(\w+)/.exec(className || '');
                     const language = match ? match[1] : '';
                     
-                    if (!match) {
+                    if (inline) {
                       return (
                         <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
                           {children}
@@ -85,14 +85,27 @@ export const Message = ({ content, role, isLoading }: MessageProps) => {
                       </SyntaxHighlighter>
                     );
                   },
-                  h1: ({ node, ...props }) => <h1 className="text-2xl font-semibold mt-8 mb-4" {...props} />,
-                  h2: ({ node, ...props }) => <h2 className="text-xl font-semibold mt-6 mb-3" {...props} />,
-                  h3: ({ node, ...props }) => <h3 className="text-lg font-semibold mt-5 mb-2" {...props} />,
-                  p: ({ node, ...props }) => <p className="text-gray-700 leading-7 mb-4" {...props} />,
-                  ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4 space-y-2" {...props} />,
-                  ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 space-y-2" {...props} />,
-                  li: ({ node, ...props }) => <li className="mb-1" {...props} />,
-                  hr: ({ node, ...props }) => <hr className="my-8 border-t-2 border-gray-200" {...props} />,
+                  p: ({ node, ...props }) => (
+                    <p className="text-gray-700 leading-7 mb-4" {...props} />
+                  ),
+                  ul: ({ node, ...props }) => (
+                    <ul className="list-disc pl-6 mb-4 space-y-2" {...props} />
+                  ),
+                  ol: ({ node, ...props }) => (
+                    <ol className="list-decimal pl-6 mb-4 space-y-2" {...props} />
+                  ),
+                  li: ({ node, ...props }) => (
+                    <li className="mb-1" {...props} />
+                  ),
+                  h1: ({ node, ...props }) => (
+                    <h1 className="text-2xl font-semibold mt-8 mb-4" {...props} />
+                  ),
+                  h2: ({ node, ...props }) => (
+                    <h2 className="text-xl font-semibold mt-6 mb-3" {...props} />
+                  ),
+                  h3: ({ node, ...props }) => (
+                    <h3 className="text-lg font-semibold mt-5 mb-2" {...props} />
+                  ),
                 }}
               >
                 {content}
