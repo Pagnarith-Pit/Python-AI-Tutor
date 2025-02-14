@@ -55,6 +55,8 @@ client = createClient(API_KEY)
 async def chat(request: Request, message: ChatMessage):
     input = message.message['messages']
     
+    generator = generate(client, input)
+    
     return EventSourceResponse(
         generator,
         media_type="text/event-stream",
