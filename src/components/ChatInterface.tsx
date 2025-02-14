@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
@@ -80,51 +81,65 @@ export const ChatInterface = () => {
         )
       );
 
-      const eventSource = new EventSource(`http://localhost:8000/chat?message=${encodeURIComponent(JSON.stringify({
-        message: {
-          messages: [...activeConversation.messages, userMessage].map(({ role, content }) => ({
-            role,
-            content,
-          })),
+      const response = await fetch('http://localhost:8000/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      }))}`);
+        body: JSON.stringify({
+          message: {
+            messages: [...activeConversation.messages, userMessage].map(({ role, content }) => ({
+              role,
+              content,
+            })),
+          },
+        }),
+      });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
       let accumulatedContent = "";
 
-      eventSource.onmessage = (event) => {
-        accumulatedContent += event.data;
+      if (!reader) {
+        throw new Error("No reader available");
+      }
+
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          break;
+        }
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
         
-        setConversations((prevConversations) =>
-          prevConversations.map((conv) =>
-            conv.id === activeConversationId
-              ? {
-                  ...conv,
-                  messages: conv.messages.map((msg, index) =>
-                    index === conv.messages.length - 1
-                      ? { ...msg, content: accumulatedContent }
-                      : msg
-                  ),
-                }
-              : conv
-          )
-        );
-      };
-
-      eventSource.onerror = (error) => {
-        console.error("EventSource error:", error);
-        eventSource.close();
-        setIsLoading(false);
-        toast({
-          title: "Error",
-          description: "Connection lost. Please try again.",
-          variant: "destructive",
-        });
-      };
-
-      eventSource.addEventListener('done', () => {
-        eventSource.close();
-        setIsLoading(false);
-      });
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            accumulatedContent += data;
+            
+            setConversations((prevConversations) =>
+              prevConversations.map((conv) =>
+                conv.id === activeConversationId
+                  ? {
+                      ...conv,
+                      messages: conv.messages.map((msg, index) =>
+                        index === conv.messages.length - 1
+                          ? { ...msg, content: accumulatedContent }
+                          : msg
+                      ),
+                    }
+                  : conv
+              )
+            );
+          }
+        }
+      }
 
     } catch (error) {
       console.error("Error in chat:", error);
@@ -133,6 +148,7 @@ export const ChatInterface = () => {
         description: "Failed to send message",
         variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
     }
   };
