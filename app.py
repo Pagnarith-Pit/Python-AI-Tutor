@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
 from openai import OpenAI
 import asyncio
+import threading
 
 
 app = FastAPI()
@@ -31,23 +32,41 @@ def createClient(api_key):
     return client
 
 async def generate(client, input):
-    try:
-        completion = client.chat.completions.create(
-            model=MODEL,
-            messages=input,
-            stream=True
-        )
+    loop = asyncio.get_running_loop()
+    queue = asyncio.Queue()
 
-        async for chunk in completion:
-            if chunk.choices[0].delta.content is not None:
-                yield chunk.choices[0].delta.content
+    def worker():
+        try:
+            # Note: Remove the await here because the method is synchronous
+            completion = client.chat.completions.create(
+                model=MODEL,
+                messages=input,
+                stream=True
+            )
+            for chunk in completion:
+                content = chunk.choices[0].delta.content
+                if content is not None:
+                    # Schedule putting the token into the queue in a thread-safe way
+                    asyncio.run_coroutine_threadsafe(queue.put(content), loop)
+        except Exception as e:
+            asyncio.run_coroutine_threadsafe(queue.put(f"Error: {str(e)}"), loop)
+        finally:
+            # Signal the end of streaming by putting a sentinel value
+            asyncio.run_coroutine_threadsafe(queue.put(None), loop)
+
+    # Run the synchronous worker in a separate thread
+    threading.Thread(target=worker, daemon=True).start()
+
+    try:
+        # Asynchronously yield tokens from the queue as they arrive
+        while True:
+            token = await queue.get()
+            if token is None:  # End-of-stream sentinel
+                break
+            yield token
     except asyncio.CancelledError:
-        # Handle the cancellation gracefully
         print("Connection was closed by the client")
         raise
-    except Exception as e:
-        print(f"Error in generate: {str(e)}")
-        yield f"Error: {str(e)}"
 
 client = createClient(API_KEY)
 
