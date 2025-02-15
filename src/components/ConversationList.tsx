@@ -84,6 +84,18 @@ export const ConversationList = ({
         body: JSON.stringify({ id }),
       });
 
+
+    if (response.status === 404) {
+      // Handle 404 error specifically
+      console.warn("Conversation not found, Deleting from Frontend");
+      onDelete(id);
+      toast({
+        title: "Deleted",
+        description: "Conversation has been removed",
+      });
+      return;
+    }
+
       if (!response.ok) {
         throw new Error("Failed to delete conversation");
       }

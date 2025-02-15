@@ -7,7 +7,8 @@ import asyncio
 import threading
 
 app = FastAPI()
-MODEL = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
+MODEL_STREAM = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
+MODEL_NOSTREAM = "Qwen/Qwen2.5-Coder-7B-Instruct"
 API_KEY = "dummy"
 
 # Configure CORS with specific headers needed for SSE
@@ -36,7 +37,7 @@ async def generate(client, input):
     def worker():
         try:
             completion = client.chat.completions.create(
-                model=MODEL,
+                model=MODEL_NOSTREAM,
                 messages=input,
                 stream=True
             )
@@ -61,19 +62,21 @@ async def generate(client, input):
             token = await queue.get()
             if token is None:  # End-of-stream
                 break
-
-            if not streaming_started:
-                buffer += token
-                if '</think>' in buffer:
-                    # Find the position right after the marker.
-                    marker_end = buffer.index('</think>') + len('</think>')
-                    # Start streaming: yield the text after the marker (if any)
-                    remainder = buffer[marker_end:]
-                    if remainder:
-                        yield remainder
-                    streaming_started = True
-            else:
-                yield token
+            
+            yield token
+            ## Uncomment the following block to enable streaming
+            # if not streaming_started:
+            #     buffer += token
+            #     if '</think>' in buffer:
+            #         # Find the position right after the marker.
+            #         marker_end = buffer.index('</think>') + len('</think>')
+            #         # Start streaming: yield the text after the marker (if any)
+            #         remainder = buffer[marker_end:]
+            #         if remainder:
+            #             yield remainder
+            #         streaming_started = True
+            # else:
+            #     yield token
 
     except asyncio.CancelledError:
         print("Connection was closed by the client")

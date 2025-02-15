@@ -6,10 +6,4 @@
 6) Streaming: the output should stream out to be displayed: DONE
 
 Working:
-1) Delete function update: since there is a delay with saving, the conversation might not exist in the Database
-if the user uses it for less than 5 minutes.
-Need to implement shorter term memory, then when session ends OR 10 minutes, save it to persistent
- 
-2) Streaming messes up the output format
-
-3) Call API for fun facts while waiting
+1) The messages aren't sent as a whole to the backend. Just the earliest one.

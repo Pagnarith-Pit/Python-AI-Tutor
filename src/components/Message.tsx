@@ -1,144 +1,122 @@
+// import { cn } from "@/lib/utils";
+// import { LoadingDots } from "./LoadingDots";
+// import ReactMarkdown from "react-markdown";
+// import remarkGfm from "remark-gfm";
+// import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
+// import { tomorrow } from "react-syntax-highlighter/dist/cjs/styles/hljs";
+// import { LoadingFact } from "./LoadingFact";
+// import { LoadingMessage } from "./LoadingMessage";
 
-import { cn } from "@/lib/utils";
-import { LoadingDots } from "./LoadingDots";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { tomorrow } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
-import { LoadingFact } from "./LoadingFact";
-import { LoadingMessage } from "./LoadingMessage";
+// interface MessageProps {
+//   content: string;
+//   role: "user" | "assistant";
+//   isLoading?: boolean;
+// }
 
-interface MessageProps {
-  content: string;
-  role: "user" | "assistant";
-  isLoading?: boolean;
-}
+// export const formatContent = (content: string) => { // Test log
+//   return (/^[\r]+$/.test(content) ? " " : content.replace(/\r/g, ''))
+//     .replace(/[ \t]+/g, ' ')                // Collapse multiple spaces and tabs but preserve newlines
+//     .replace(/(---)/g, '\n$1\n')            // Ensure horizontal rules are on their own line
+//     // Ensure headers start on a new line, with exactly one space after the hash marks.
+//     .replace(/(^|\n)(#+)\s*/g, '$1$2 ')
+//     // Optional: Ensure code block markers (```) are on their own line.
+//     .replace(/```/g, '\n```\n');
+// };
 
-// Custom style based on ChatGPT's code blocks
-const customStyle = {
-  ...tomorrow,
-  'code[class*="language-"]': {
-    ...tomorrow['code[class*="language-"]'],
-    background: '#f5f5f5',
-    color: '#374151',
-  },
-  'pre[class*="language-"]': {
-    ...tomorrow['pre[class*="language-"]'],
-    background: '#f5f5f5',
-    padding: '1.25rem',
-    borderRadius: '0.5rem',
-    margin: '1.5rem 0',
-    maxHeight: '300px',
-    overflow: 'auto',
-  }
-};
+// // Custom style based on ChatGPT's code blocks, with custom background and padding.
+// const customStyle = {
+//   ...tomorrow,
+//   'code[class*="language-"]': {
+//     ...tomorrow['code[class*="language-"]'],
+//     background: "#f5f5f5",
+//     color: "#374151",
+//   },
+//   "pre[class*='language-']": {
+//     ...tomorrow["pre[class*='language-']"],
+//     background: "#f5f5f5",
+//     padding: "1.25rem",
+//     borderRadius: "0.5rem",
+//     margin: "1.5rem 0",
+//     maxHeight: "300px",
+//     overflow: "auto",
+//   },
+// };
 
-export const formatContent = (content: string) => {
-  // Replace spaces after punctuation
-  return content
-    .replace(/([.,!?])\s*(\S)/g, '$1 $2')
-    // Fix markdown bold/italic markers that might have spaces
-    .replace(/\*\s*\*/g, '**')
-    .replace(/\*\s+(\w)/g, '*$1')
-    .replace(/(\w)\s+\*/g, '$1*')
-    // Fix code block markers
-    .replace(/```\s+/g, '```')
-    // Ensure proper newlines before and after lists
-    .replace(/(\d+\.|\*)\s*/g, '\n$1 ')
-    // Fix multiple spaces
-    .replace(/\s+/g, ' ')
-    // Fix markdown headings
-    .replace(/#+\s*/g, (match) => match.trim() + ' ');
-};
+// export const Message = ({ content, role, isLoading }: MessageProps) => {
+//   const isUser = role === "user";
 
-export const Message = ({ content, role, isLoading }: MessageProps) => {
-  const isUser = role === "user";
-  // const formattedContent = formatContent(content);
-
-  return (
-    <div className={cn("px-4 py-6 sm:px-6 lg:px-8 bg-white")}>
-      <div className="mx-auto max-w-3xl flex gap-4">
-        <div className={cn(
-          "h-8 w-8 rounded-full flex items-center justify-center shrink-0",
-          isUser ? "bg-purple-600 text-white" : "bg-purple-200 text-purple-900"
-        )}>
-          {isUser ? "U" : "H"}
-        </div>
-        <div className="flex-1 space-y-3">
-          <div className="text-sm font-medium text-gray-800">
-            {isUser ? "You" : "Helper Buddy"}
-          </div>
-          {isLoading ? (
-            <>
-            <LoadingDots className="pt-2" />
-            <div className="mt-4">
-                <LoadingMessage /> 
-              </div>
-            </>
-          ) : (
-            <div className="prose prose-sm max-w-none">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  code({ node, className, children, ...props }) {
-                    const match = /language-(\w+)/.exec(className || '');
-                    const language = match ? match[1] : '';
+//   return (
+//     <div className={cn("px-4 py-6 sm:px-6 lg:px-8 bg-white")}>
+//       <div className="mx-auto max-w-3xl flex gap-4">
+//         <div
+//           className={cn(
+//             "h-8 w-8 rounded-full flex items-center justify-center shrink-0",
+//             isUser ? "bg-purple-600 text-white" : "bg-purple-200 text-purple-900"
+//           )}
+//         >
+//           {isUser ? "U" : "H"}
+//         </div>
+//         <div className="flex-1 space-y-3">
+//           <div className="text-sm font-medium text-gray-800">
+//             {isUser ? "You" : "Helper Buddy"}
+//           </div>
+//           {isLoading ? (
+//             <>
+//               <LoadingDots className="pt-2" />
+//               <div className="mt-4">
+//                 <LoadingMessage />
+//               </div>
+//             </>
+//           ) : (
+//             <div className="prose prose-sm max-w-none">
+//              <ReactMarkdown
+//                 remarkPlugins={[remarkGfm]}
+//                 components={{
+//                   code: ({ node, className, children, ...props }) => {
+//                     const match = /language-(\w+)/.exec(className || '');
+//                     const language = match ? match[1] : '';
                     
-                    const isInline = !match && !className;
-                    
-                    if (isInline) {
-                      return (
-                        <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
-                          {children}
-                        </code>
-                      );
-                    }
+//                     if (!match) {
+//                       console.log(formatContent(content));
+//                       return (
+//                         <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+//                           {children}
+//                         </code>
+//                       );
+//                     }
 
-                    return (
-                      <SyntaxHighlighter
-                        style={customStyle}
-                        language={language}
-                        PreTag="div"
-                        customStyle={{
-                          margin: '1.5rem 0',
-                          borderRadius: '0.5rem',
-                          background: '#f5f5f5',
-                        }}
-                      >
-                        {String(children).replace(/\n$/, '')}
-                      </SyntaxHighlighter>
-                    );
-                  },
-                  p({ children }) {
-                    return <p className="text-gray-700 leading-7 mb-4">{children}</p>;
-                  },
-                  ul({ children }) {
-                    return <ul className="list-disc pl-6 mb-4 space-y-2">{children}</ul>;
-                  },
-                  ol({ children }) {
-                    return <ol className="list-decimal pl-6 mb-4 space-y-2">{children}</ol>;
-                  },
-                  li({ children }) {
-                    return <li className="mb-1">{children}</li>;
-                  },
-                  h1({ children }) {
-                    return <h1 className="text-2xl font-semibold mt-8 mb-4">{children}</h1>;
-                  },
-                  h2({ children }) {
-                    return <h2 className="text-xl font-semibold mt-6 mb-3">{children}</h2>;
-                  },
-                  h3({ children }) {
-                    return <h3 className="text-lg font-semibold mt-5 mb-2">{children}</h3>;
-                  },
-                }}
-              >
-                {/* {formattedContent} */}
-                {content}
-              </ReactMarkdown>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
+//                     return (
+//                       <SyntaxHighlighter
+//                         style={customStyle}
+//                         language={language}
+//                         PreTag="div"
+//                         customStyle={{
+//                           margin: '1.5rem 0',
+//                           borderRadius: '0.5rem',
+//                           background: '#f5f5f5',
+//                         }}
+//                       >
+//                         {String(children).replace(/\n$/, '')}
+//                       </SyntaxHighlighter>
+//                     );
+//                   },
+//                   h1: ({ node, ...props }) => <h1 className="text-2xl font-semibold mt-8 mb-4" {...props} />,
+//                   h2: ({ node, ...props }) => <h2 className="text-xl font-semibold mt-6 mb-3" {...props} />,
+//                   h3: ({ node, ...props }) => <h3 className="text-lg font-semibold mt-5 mb-2" {...props} />,
+//                   p: ({ node, ...props }) => <p className="text-gray-700 leading-7 mb-4" {...props} />,
+//                   ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4 space-y-2" {...props} />,
+//                   ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 space-y-2" {...props} />,
+//                   li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+//                   hr: ({ node, ...props }) => <hr className="my-8 border-t-2 border-gray-200" {...props} />,
+//                 }}
+//               >
+
+//                 {formatContent(content)}
+//               </ReactMarkdown>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
