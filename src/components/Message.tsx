@@ -14,15 +14,18 @@ interface MessageProps {
 }
 
 // Format content to handle carriage returns and preserve formatting
-export const formatContent = (content: string) => {
-  return (/^[\r]+$/.test(content) ? " " : content.replace(/\r/g, ''))
-    .replace(/[ \t]+/g, ' ')                // Collapse multiple spaces and tabs but preserve newlines
-    .replace(/(---)/g, '\n$1\n')            // Ensure horizontal rules are on their own line
-    // Ensure headers start on a new line, with exactly one space after the hash marks
-    .replace(/(^|\n)(#+)\s*/g, '$1$2 ')
-    // Optional: Ensure code block markers (```) are on their own line
-    .replace(/```/g, '\n```\n');
+export const formatContent = (content: string): string => {
+  // Check if the content consists solely of carriage returns.
+  if (/^\r+$/.test(content)) {
+    const count = content.length;
+    // Return (count - 1) newline characters.
+    return "\n".repeat(Math.max(count - 1, 1));
+  }
+  
+  // For content with other characters, remove all carriage returns.
+  return content.replace(/\r/g, "");
 };
+
 
 // Custom style based on ChatGPT's code blocks, with custom background and padding
 const customStyle = {
@@ -39,6 +42,7 @@ const customStyle = {
     borderRadius: "0.5rem",
     margin: "1.5rem 0",
     maxHeight: "300px",
+    maxwidth: "100%",
     overflow: "auto",
   },
 };
@@ -78,7 +82,6 @@ export const Message = ({ content, role, isLoading }: MessageProps) => {
                     const language = match ? match[1] : '';
                     
                     if (!match) {
-                      console.log(formatContent(content));
                       return (
                         <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
                           {children}
@@ -111,7 +114,7 @@ export const Message = ({ content, role, isLoading }: MessageProps) => {
                   hr: ({ node, ...props }) => <hr className="my-8 border-t-2 border-gray-200" {...props} />,
                 }}
               >
-                {formatContent(content)}
+                {content}
               </ReactMarkdown>
             </div>
           )}

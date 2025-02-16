@@ -7,8 +7,8 @@ import asyncio
 import threading
 
 app = FastAPI()
-MODEL_STREAM = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
-MODEL_NOSTREAM = "Qwen/Qwen2.5-Coder-7B-Instruct"
+MODEL_THINK = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
+MODEL_NOTHINK = "Qwen/Qwen2.5-Coder-7B-Instruct"
 API_KEY = "dummy"
 
 # Configure CORS with specific headers needed for SSE
@@ -37,7 +37,7 @@ async def generate(client, input):
     def worker():
         try:
             completion = client.chat.completions.create(
-                model=MODEL_NOSTREAM,
+                model=MODEL_NOTHINK,
                 messages=input,
                 stream=True
             )

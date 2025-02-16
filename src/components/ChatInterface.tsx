@@ -4,6 +4,7 @@ import { MessageInput } from "./MessageInput";
 import { ConversationList } from "./ConversationList";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "./ui/use-toast";
+import { formatContent } from "./Message";
 
 interface Message {
   role: "user" | "assistant";
@@ -126,13 +127,7 @@ export const ChatInterface = () => {
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
-            let data = line.slice(6);
-            // Check if data is only \r and replace it with a space, otherwise remove \r
-            // if (data === "\r") {
-            //   data = " ";
-            // } else {
-            //   data = data.replace(/\r/g, "");
-            // }
+            let data = formatContent(line.slice(6));
 
             const detailed = [...data].map((char, index) => {
               return `Index ${index}: "${char}" (Code: ${char.charCodeAt(0)})`;
@@ -235,3 +230,4 @@ export const ChatInterface = () => {
     </div>
   );
 };
+
