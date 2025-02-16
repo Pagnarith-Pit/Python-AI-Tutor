@@ -1,3 +1,4 @@
+
 import { useEffect, useRef } from "react";
 import { Message } from "./Message";
 import { LoadingMessage } from "./LoadingMessage";
@@ -30,8 +31,12 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
         <>
           {messages.map((message, index) => (
             <div key={index}>
-            <Message {...message} isLoading={isLoading && index === messages.length - 1 && message.role === "assistant"} />
-          </div>
+              <Message 
+                {...message} 
+                isLoading={isLoading && index === messages.length - 1 && message.role === "assistant"}
+                isLastMessage={!isLoading && index === messages.length - 1 && message.role === "assistant"}
+              />
+            </div>
           ))}
           <div ref={bottomRef} />
         </>

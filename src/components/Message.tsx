@@ -11,6 +11,7 @@ interface MessageProps {
   content: string;
   role: "user" | "assistant";
   isLoading?: boolean;
+  isLastMessage?: boolean;
 }
 
 // Format content to handle carriage returns and preserve formatting
@@ -25,7 +26,6 @@ export const formatContent = (content: string): string => {
   // For content with other characters, remove all carriage returns.
   return content.replace(/\r/g, "");
 };
-
 
 // Custom style based on ChatGPT's code blocks, with custom background and padding
 const customStyle = {
@@ -48,7 +48,7 @@ const customStyle = {
   },
 };
 
-export const Message = ({ content, role, isLoading }: MessageProps) => {
+export const Message = ({ content, role, isLoading, isLastMessage }: MessageProps) => {
   const isUser = role === "user";
 
   return (
@@ -75,7 +75,7 @@ export const Message = ({ content, role, isLoading }: MessageProps) => {
             </>
           ) : (
             <div className="prose prose-sm max-w-none">
-             <ReactMarkdown
+              <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
                   code: ({ node, className, children, ...props }) => {
@@ -117,7 +117,7 @@ export const Message = ({ content, role, isLoading }: MessageProps) => {
               >
                 {content}
               </ReactMarkdown>
-              {role === "assistant" && (
+              {role === "assistant" && isLastMessage && (
                 <div className="mt-4">
                   <LoadingMessage />
                 </div>
