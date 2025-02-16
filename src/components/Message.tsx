@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils";
 import { LoadingDots } from "./LoadingDots";
 import ReactMarkdown from "react-markdown";
@@ -12,6 +11,7 @@ interface MessageProps {
   role: "user" | "assistant";
   isLoading?: boolean;
   isLastMessage?: boolean;
+  isGenerating?: boolean; // added isGenerating prop
 }
 
 // Format content to handle carriage returns and preserve formatting
@@ -48,7 +48,7 @@ const customStyle = {
   },
 };
 
-export const Message = ({ content, role, isLoading, isLastMessage }: MessageProps) => {
+export const Message = ({ content, role, isLoading, isLastMessage, isGenerating }: MessageProps) => {
   const isUser = role === "user";
 
   return (
@@ -69,9 +69,11 @@ export const Message = ({ content, role, isLoading, isLastMessage }: MessageProp
           {isLoading ? (
             <>
               <LoadingDots className="pt-2" />
-              <div className="mt-4">
-                <LoadingMessage />
-              </div>
+              {!isGenerating && (
+                <div className="mt-4">
+                  <LoadingMessage />
+                </div>
+              )}
             </>
           ) : (
             <div className="prose prose-sm max-w-none">
@@ -117,7 +119,7 @@ export const Message = ({ content, role, isLoading, isLastMessage }: MessageProp
               >
                 {content}
               </ReactMarkdown>
-              {role === "assistant" && isLastMessage && (
+              {role === "assistant" && isLastMessage && !isGenerating && (
                 <div className="mt-4">
                   <LoadingMessage />
                 </div>

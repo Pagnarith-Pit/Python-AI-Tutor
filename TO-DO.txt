@@ -5,8 +5,5 @@
 5) Formatting: the outputs are just strings for now: DONE
 6) Streaming: the output should stream out to be displayed: DONE
 7) Stop Generation: DONE
+8) Expanded Progress: DONE
 
-Working:
-1) The expanding tab: when pressed, I want it to expand to expand to the screen.
-Rounded rectangle border
-ABout 80% of the screen

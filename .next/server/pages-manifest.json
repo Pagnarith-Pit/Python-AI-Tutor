@@ -2,5 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js"
+  "/api/save-conversations": "pages/api/save-conversations.js",
+  "/": "pages/index.js",
+  "/api/get-conversations": "pages/api/get-conversations.js"
 }

@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils";
 import { LoadingDots } from "./LoadingDots";
 import { LoadingFact } from "./LoadingFact";
@@ -16,14 +15,14 @@ export const LoadingMessage = () => {
   return (
     <div
       className={cn(
-        "transition-all duration-300 ease-in-out fixed bottom-0 right-0",
-        isExpanded 
-          ? "w-[80vw] h-[80vh] bg-gray-50 z-50 shadow-xl" 
-          : "w-full bg-gray-50 relative"
+        "transition-all duration-300 ease-in-out rounded-3xl",
+        isExpanded
+          ? "fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[80vw] h-[80vh] bg-gray-50 z-50 shadow-xl"
+          : "w-full bg-gray-50 relative bottom-0 right-0"
       )}
     >
       <div className={cn(
-        "px-4 py-6 sm:px-6 lg:px-8 border-t border-b border-gray-100",
+        "px-4 py-6 sm:px-6 lg:px-8",
         isExpanded && "h-full"
       )}>
         <div className="mx-auto max-w-3xl flex gap-4 relative">
@@ -47,8 +46,8 @@ export const LoadingMessage = () => {
               </Button>
             </div>
             <div className={cn(
-              "transition-all duration-300",
-              isExpanded ? "h-[calc(80vh-8rem)] overflow-y-auto" : "h-auto"
+              "transition-all duration-300 overflow-y-auto",
+              isExpanded ? "h-[calc(80vh-8rem)]" : "h-auto"
             )}>
               <LoadingFact />
             </div>
