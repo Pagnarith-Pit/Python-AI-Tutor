@@ -4,6 +4,7 @@
 4) API to Real Model: DONE
 5) Formatting: the outputs are just strings for now: DONE
 6) Streaming: the output should stream out to be displayed: DONE
+7) Stop Generation: DONE
 
 Working:
 1) The expanding tab: when pressed, I want it to expand to expand to the screen.
