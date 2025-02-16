@@ -6,4 +6,6 @@
 6) Streaming: the output should stream out to be displayed: DONE
 
 Working:
-1) The messages aren't sent as a whole to the backend. Just the earliest one.
+1) The expanding tab: when pressed, I want it to expand to expand to the screen.
+Rounded rectangle border
+ABout 80% of the screen

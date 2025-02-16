@@ -2,7 +2,6 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js",
-  "/api/delete-conversation": "pages/api/delete-conversation.js",
-  "/api/get-conversations": "pages/api/get-conversations.js"
+  "/api/get-conversations": "pages/api/get-conversations.js",
+  "/": "pages/index.js"
 }

@@ -64,7 +64,7 @@ async def generate(client, input):
                 break
             
             yield token
-            ## Uncomment the following block to enable streaming
+            ## Uncomment the following block to enable streaming with think markers
             # if not streaming_started:
             #     buffer += token
             #     if '</think>' in buffer:
