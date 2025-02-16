@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -30,7 +31,7 @@ def createClient(api_key):
     )
     return client
 
-async def generate(client, input):
+async def generate(client, input, request: Request):
     loop = asyncio.get_running_loop()
     queue = asyncio.Queue()
 
@@ -42,6 +43,8 @@ async def generate(client, input):
                 stream=True
             )
             for chunk in completion:
+                if request.client.disconnected:
+                    break
                 content = chunk.choices[0].delta.content
                 if content is not None:
                     asyncio.run_coroutine_threadsafe(queue.put(content), loop)
@@ -52,36 +55,28 @@ async def generate(client, input):
             asyncio.run_coroutine_threadsafe(queue.put(None), loop)
 
     # Start the worker thread
-    threading.Thread(target=worker, daemon=True).start()
-
-    buffer = ""
-    streaming_started = False
+    thread = threading.Thread(target=worker, daemon=True)
+    thread.start()
 
     try:
         while True:
+            # Check if client disconnected
+            if await request.is_disconnected():
+                break
+                
             token = await queue.get()
             if token is None:  # End-of-stream
                 break
             
             yield token
-            ## Uncomment the following block to enable streaming with think markers
-            # if not streaming_started:
-            #     buffer += token
-            #     if '</think>' in buffer:
-            #         # Find the position right after the marker.
-            #         marker_end = buffer.index('</think>') + len('</think>')
-            #         # Start streaming: yield the text after the marker (if any)
-            #         remainder = buffer[marker_end:]
-            #         if remainder:
-            #             yield remainder
-            #         streaming_started = True
-            # else:
-            #     yield token
 
     except asyncio.CancelledError:
-        print("Connection was closed by the client")
+        print("Stream was cancelled by the client")
         raise
-
+    finally:
+        if thread.is_alive():
+            # The thread will eventually terminate since it's a daemon thread
+            print("Cleaning up worker thread")
 
 client = createClient(API_KEY)
 
@@ -89,7 +84,7 @@ client = createClient(API_KEY)
 async def chat(request: Request, message: ChatMessage):
     input = message.message['messages']
     
-    generator = generate(client, input)
+    generator = generate(client, input, request)
     
     return EventSourceResponse(
         generator,

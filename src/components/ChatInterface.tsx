@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
@@ -26,6 +27,7 @@ export const ChatInterface = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const { toast } = useToast();
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // This ref will store the accumulated stream data.
   const accumulatedContentRef = useRef("");
@@ -58,18 +60,19 @@ export const ChatInterface = () => {
     fetchConversations();
   }, [toast]);
 
-  const handleSendMessage = async (content: string) => {
-    // Lock in the current conversation so that even if the active conversation changes,
-    // we update the right one.
-    const conversationId = activeConversationId;
+  const handleStopGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setIsLoading(false);
+    }
+  };
 
-    // Create our user message
+  const handleSendMessage = async (content: string) => {
+    const conversationId = activeConversationId;
     const userMessage: Message = { role: "user", content };
-    // Create a placeholder for the assistant message that will be updated as the stream comes in.
     const assistantMessage: Message = { role: "assistant", content: "" };
 
-    // Build the new messages array.
-    // (Since setState is async, we don’t want to rely on a variable computed before this point.)
     setConversations((prevConversations) =>
       prevConversations.map((conv) =>
         conv.id === conversationId
@@ -78,18 +81,25 @@ export const ChatInterface = () => {
       )
     );
 
-    // Update the active conversation with the new user message
-    const updatedConversation = {
-      ...activeConversation,
-      messages: [...activeConversation.messages, userMessage],
-    };
+    const updatedConversation = conversations.find(
+      (conv) => conv.id === conversationId
+    );
+
+    if (!updatedConversation) return;
 
     setIsLoading(true);
 
     try {
-      // Build the request body.
-      // We know what messages we just added so we don’t rely on a stale snapshot.
-      const requestBody = JSON.stringify({ message: updatedConversation });
+      // Create a new AbortController for this request
+      abortControllerRef.current = new AbortController();
+      const signal = abortControllerRef.current.signal;
+
+      const requestBody = JSON.stringify({
+        message: {
+          ...updatedConversation,
+          messages: [...updatedConversation.messages, userMessage],
+        },
+      });
 
       const response = await fetch("http://localhost:8000/chat", {
         method: "POST",
@@ -97,6 +107,7 @@ export const ChatInterface = () => {
           "Content-Type": "application/json",
         },
         body: requestBody,
+        signal, // Pass the signal to the fetch request
       });
 
       if (!response.ok) {
@@ -107,8 +118,6 @@ export const ChatInterface = () => {
       if (!reader) throw new Error("No reader available");
 
       const decoder = new TextDecoder();
-      let accumulatedContent = "";
-      // Clear any previous content.
       accumulatedContentRef.current = "";
 
       let isFirstChunk = true;
@@ -127,29 +136,14 @@ export const ChatInterface = () => {
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
-            let data = formatContent(line.slice(6));
+            const data = formatContent(line.slice(6));
+            accumulatedContentRef.current += data;
 
-            const detailed = [...data].map((char, index) => {
-              return `Index ${index}: "${char}" (Code: ${char.charCodeAt(0)})`;
-            }).join("\n");
-            
-            console.log(detailed);
-
-            accumulatedContent += data;
-            accumulatedContentRef.current = accumulatedContent;
-            // Testing to see if the elements are being removed
-            const currentConversation = conversations.find(conv => conv.id === conversationId);
-            // Use a functional update so that you always work off the latest state.
             setConversations((prevConversations) =>
               prevConversations.map((conv) => {
                 if (conv.id === conversationId) {
-                  // Copy the messages array
                   const messages = [...conv.messages];
-                  // Always update the last message (the assistant message)
                   const lastIndex = messages.length - 1;
-                  // console.log(messages[lastIndex].content);
-                  // console.log("Spacing");
-                  // console.log(formatContent(accumulatedContentRef.current));
                   messages[lastIndex] = {
                     ...messages[lastIndex],
                     content: accumulatedContentRef.current,
@@ -163,12 +157,19 @@ export const ChatInterface = () => {
         }
       }
     } catch (error) {
-      console.error("Error in chat:", error);
-      toast({
-        title: "Error",
-        description: "Failed to send message",
-        variant: "destructive",
-      });
+      if (error.name === 'AbortError') {
+        console.log('Fetch aborted');
+      } else {
+        console.error("Error in chat:", error);
+        toast({
+          title: "Error",
+          description: "Failed to send message",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsLoading(false);
+      abortControllerRef.current = null;
     }
   };
 
@@ -208,7 +209,6 @@ export const ChatInterface = () => {
     );
   }
 
-  // Recompute the active conversation on every render
   const activeConversation =
     conversations.find((c) => c.id === activeConversationId) ||
     conversations[0];
@@ -224,10 +224,17 @@ export const ChatInterface = () => {
       />
 
       <div className="flex-1 overflow-hidden flex flex-col">
-        <MessageList messages={activeConversation.messages} isLoading={isLoading} />
-        <MessageInput onSend={handleSendMessage} disabled={isLoading} />
+        <MessageList 
+          messages={activeConversation.messages} 
+          isLoading={isLoading} 
+        />
+        <MessageInput 
+          onSend={handleSendMessage} 
+          onStop={handleStopGeneration}
+          disabled={isLoading} 
+          isGenerating={isLoading}
+        />
       </div>
     </div>
   );
 };
-
