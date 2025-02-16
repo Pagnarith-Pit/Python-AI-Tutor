@@ -3,5 +3,5 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
-  "/api/save-conversations": "pages/api/save-conversations.js"
+  "/api/get-conversations": "pages/api/get-conversations.js"
 }
