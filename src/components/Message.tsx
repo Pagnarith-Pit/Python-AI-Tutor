@@ -42,8 +42,9 @@ const customStyle = {
     borderRadius: "0.5rem",
     margin: "1.5rem 0",
     maxHeight: "300px",
-    maxwidth: "100%",
-    overflow: "auto",
+    maxWidth: "100%",
+    overflowX: "auto",
+    overflowY: "auto",
   },
 };
 
@@ -91,7 +92,7 @@ export const Message = ({ content, role, isLoading }: MessageProps) => {
 
                     return (
                       <SyntaxHighlighter
-                        style={customStyle}
+                        style={customStyle as any}
                         language={language}
                         PreTag="div"
                         customStyle={{
