@@ -12,7 +12,7 @@ export const LoadingMessage = () => {
         </div>
         <div className="flex-1 space-y-3">
           <div className="text-sm font-medium text-gray-800">
-            Loading Buddy
+            Progress Buddy
           </div>
           <LoadingFact />
         </div>

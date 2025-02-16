@@ -117,6 +117,11 @@ export const Message = ({ content, role, isLoading }: MessageProps) => {
               >
                 {content}
               </ReactMarkdown>
+              {role === "assistant" && (
+                <div className="mt-4">
+                  <LoadingMessage />
+                </div>
+              )}
             </div>
           )}
         </div>
