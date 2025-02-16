@@ -156,16 +156,18 @@ export const ChatInterface = () => {
           }
         }
       }
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        console.log('Fetch aborted');
-      } else {
-        console.error("Error in chat:", error);
-        toast({
-          title: "Error",
-          description: "Failed to send message",
-          variant: "destructive",
-        });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          console.log('Fetch aborted');
+        } else {
+          console.error("Error in chat:", error);
+          toast({
+            title: "Error",
+            description: "Failed to send message",
+            variant: "destructive",
+          });
+        }
       }
     } finally {
       setIsLoading(false);

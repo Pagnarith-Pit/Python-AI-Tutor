@@ -34,6 +34,7 @@ def createClient(api_key):
 async def generate(client, input, request: Request):
     loop = asyncio.get_running_loop()
     queue = asyncio.Queue()
+    is_disconnected = False
 
     def worker():
         try:
@@ -43,7 +44,7 @@ async def generate(client, input, request: Request):
                 stream=True
             )
             for chunk in completion:
-                if request.client.disconnected:
+                if is_disconnected:
                     break
                 content = chunk.choices[0].delta.content
                 if content is not None:
@@ -60,10 +61,11 @@ async def generate(client, input, request: Request):
 
     try:
         while True:
-            # Check if client disconnected
+            # Check if client disconnected using the state connection
             if await request.is_disconnected():
+                is_disconnected = True
                 break
-                
+
             token = await queue.get()
             if token is None:  # End-of-stream
                 break
@@ -72,6 +74,7 @@ async def generate(client, input, request: Request):
 
     except asyncio.CancelledError:
         print("Stream was cancelled by the client")
+        is_disconnected = True
         raise
     finally:
         if thread.is_alive():
