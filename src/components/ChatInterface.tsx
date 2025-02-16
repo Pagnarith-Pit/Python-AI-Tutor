@@ -25,6 +25,7 @@ export const ChatInterface = () => {
     conversations[0].id
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const { toast } = useToast();
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -64,7 +65,7 @@ export const ChatInterface = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
-      setIsLoading(false);
+      setIsStreaming(false);
     }
   };
 
@@ -88,6 +89,7 @@ export const ChatInterface = () => {
     if (!updatedConversation) return;
 
     setIsLoading(true);
+    setIsStreaming(true);
 
     try {
       // Create a new AbortController for this request
@@ -120,19 +122,17 @@ export const ChatInterface = () => {
       const decoder = new TextDecoder();
       accumulatedContentRef.current = "";
 
-      let isFirstChunk = true;
+      setIsLoading(false);
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) {
+          setIsStreaming(false);
+          break;
+        }
 
         const chunk = decoder.decode(value);
         const lines = chunk.split("\n");
-
-        if (isFirstChunk) {
-          setIsLoading(false);
-          isFirstChunk = false;
-        }
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
@@ -156,19 +156,22 @@ export const ChatInterface = () => {
           }
         }
       }
-    } catch (error) {
-      if ((error as any).name === 'AbortError') {
-        console.log('Fetch aborted');
-      } else {
-        console.error("Error in chat:", error);
-        toast({
-          title: "Error",
-          description: "Failed to send message",
-          variant: "destructive",
-        });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          console.log('Fetch aborted');
+        } else {
+          console.error("Error in chat:", error);
+          toast({
+            title: "Error",
+            description: "Failed to send message",
+            variant: "destructive",
+          });
+        }
       }
     } finally {
       setIsLoading(false);
+      setIsStreaming(false);
       abortControllerRef.current = null;
     }
   };
@@ -232,7 +235,7 @@ export const ChatInterface = () => {
           onSend={handleSendMessage} 
           onStop={handleStopGeneration}
           disabled={isLoading} 
-          isGenerating={isLoading}
+          isGenerating={isStreaming}
         />
       </div>
     </div>
