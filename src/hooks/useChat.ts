@@ -48,14 +48,19 @@ export const useChat = (
       abortControllerRef.current = new AbortController();
       const signal = abortControllerRef.current.signal;
 
+      const requestBody = JSON.stringify({
+        message: {
+          ...updatedConversation,
+          messages: [...updatedConversation.messages, userMessage],
+        },
+      });
+
       const response = await fetch("http://localhost:8000/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          message: content,
-        }),
+        body: requestBody,
         signal,
       });
 
