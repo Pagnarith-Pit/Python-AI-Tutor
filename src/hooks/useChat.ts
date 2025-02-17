@@ -48,6 +48,7 @@ export const useChat = (
       abortControllerRef.current = new AbortController();
       const signal = abortControllerRef.current.signal;
 
+      // Create a full record of the conversation so far
       const requestBody = JSON.stringify({
         message: {
           ...updatedConversation,
