@@ -1,7 +1,12 @@
-
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://your-project.supabase.co';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = 'https://svnkjfcbousrkdbfrebl.supabase.co';
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+if (!supabaseKey) {
+  throw new Error("Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable");
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+export default supabase;

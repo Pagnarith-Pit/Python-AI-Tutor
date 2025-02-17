@@ -1,4 +1,4 @@
-
+import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,9 +12,11 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Component {...pageProps} />
-        <Toaster />
-        <Sonner />
+        <AuthProvider>
+          <Component {...pageProps} />
+          <Toaster />
+          <Sonner />
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

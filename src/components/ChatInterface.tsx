@@ -7,7 +7,7 @@ import { useToast } from "./ui/use-toast";
 import { formatContent } from "./Message";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoginForm } from "./LoginForm";
-import { supabase } from "@/lib/supabase";
+import supabase from "@/lib/supabase";
 
 interface Message {
   role: "user" | "assistant";
