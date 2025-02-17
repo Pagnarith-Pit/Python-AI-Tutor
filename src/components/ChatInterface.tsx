@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
@@ -6,6 +5,9 @@ import { ConversationList } from "./ConversationList";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "./ui/use-toast";
 import { formatContent } from "./Message";
+import { useAuth } from "@/contexts/AuthContext";
+import { LoginForm } from "./LoginForm";
+import { supabase } from "@/lib/supabase";
 
 interface Message {
   role: "user" | "assistant";
@@ -18,6 +20,7 @@ interface Conversation {
 }
 
 export const ChatInterface = () => {
+  const { user, loading: authLoading } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([
     { id: uuidv4(), messages: [] }
   ]);
@@ -30,17 +33,20 @@ export const ChatInterface = () => {
   const { toast } = useToast();
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // This ref will store the accumulated stream data.
   const accumulatedContentRef = useRef("");
 
   useEffect(() => {
     const fetchConversations = async () => {
+      if (!user) return;
+      
       try {
-        const response = await fetch("/api/get-conversations");
-        if (!response.ok) {
-          throw new Error("Failed to fetch conversations");
-        }
-        const data = await response.json();
+        const { data, error } = await supabase
+          .from('conversations')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
 
         if (data && data.length > 0) {
           setConversations(data);
@@ -58,8 +64,88 @@ export const ChatInterface = () => {
       }
     };
 
-    fetchConversations();
-  }, [toast]);
+    if (user) {
+      fetchConversations();
+    }
+  }, [user, toast]);
+
+  const saveConversations = async () => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('conversations')
+        .upsert(
+          conversations.map(conv => ({
+            ...conv,
+            user_id: user.id,
+            updated_at: new Date().toISOString()
+          }))
+        );
+
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error saving conversations:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save conversations",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteConversation = async (id: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('conversations')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setConversations((prevConversations) => {
+        const updatedConversations = prevConversations.filter(
+          (conv) => conv.id !== id
+        );
+
+        if (activeConversationId === id) {
+          if (updatedConversations.length > 0) {
+            setActiveConversationId(updatedConversations[0].id);
+          } else {
+            const newConversation = { id: uuidv4(), messages: [] };
+            setActiveConversationId(newConversation.id);
+            return [newConversation];
+          }
+        }
+        return updatedConversations;
+      });
+
+      toast({
+        title: "Success",
+        description: "Conversation deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting conversation:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete conversation",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (user && conversations.length > 0) {
+      const timeoutId = setTimeout(() => {
+        saveConversations();
+      }, 1000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [conversations, user]);
 
   const handleStopGeneration = () => {
     if (abortControllerRef.current) {
@@ -92,7 +178,6 @@ export const ChatInterface = () => {
     setIsStreaming(true);
 
     try {
-      // Create a new AbortController for this request
       abortControllerRef.current = new AbortController();
       const signal = abortControllerRef.current.signal;
 
@@ -109,7 +194,7 @@ export const ChatInterface = () => {
           "Content-Type": "application/json",
         },
         body: requestBody,
-        signal, // Pass the signal to the fetch request
+        signal,
       });
 
       if (!response.ok) {
@@ -185,31 +270,16 @@ export const ChatInterface = () => {
     setActiveConversationId(newConversation.id);
   };
 
-  const handleDeleteConversation = (id: string) => {
-    setConversations((prevConversations) => {
-      const updatedConversations = prevConversations.filter(
-        (conv) => conv.id !== id
-      );
-
-      if (activeConversationId === id) {
-        if (updatedConversations.length > 0) {
-          setActiveConversationId(updatedConversations[0].id);
-        } else {
-          const newConversation = { id: uuidv4(), messages: [] };
-          setActiveConversationId(newConversation.id);
-          return [newConversation];
-        }
-      }
-      return updatedConversations;
-    });
-  };
-
-  if (isInitialLoad) {
+  if (authLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
       </div>
     );
+  }
+
+  if (!user) {
+    return <LoginForm />;
   }
 
   const activeConversation =
