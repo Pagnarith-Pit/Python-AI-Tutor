@@ -69,11 +69,9 @@ export const Message = ({ content, role, isLoading, isLastMessage, isGenerating 
           {isLoading ? (
             <>
               <LoadingDots className="pt-2" />
-              {!isGenerating && (
-                <div className="mt-4">
-                  <LoadingMessage />
-                </div>
-              )}
+              <div className="mt-4">
+                <LoadingMessage />
+              </div>
             </>
           ) : (
             <div className="prose prose-sm max-w-none">
