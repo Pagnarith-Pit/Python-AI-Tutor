@@ -1,7 +1,9 @@
+
 import { useState, useEffect, useRef } from "react";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { ConversationList } from "./ConversationList";
+import { UserMenu } from "./UserMenu";
 import { v4 as uuidv4 } from "uuid";
 import { useToast } from "./ui/use-toast";
 import { formatContent } from "./Message";
@@ -227,13 +229,14 @@ export const ChatInterface = () => {
 
   return (
     <div className="flex h-screen bg-gray-50">
+      <UserMenu />
       <ConversationList
         conversations={conversations}
         activeConversationId={activeConversationId}
         onSelect={setActiveConversationId}
-        onDelete={removeConversationFromState} // ChatInterface simply passes this prop
+        onDelete={removeConversationFromState}
         onNewChat={handleNewChat}
-        user = {user}
+        user={user}
       />
 
       <div className="flex-1 overflow-hidden flex flex-col">
@@ -251,3 +254,4 @@ export const ChatInterface = () => {
     </div>
   );
 };
+
