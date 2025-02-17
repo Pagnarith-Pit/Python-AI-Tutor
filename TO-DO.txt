@@ -7,3 +7,5 @@
 7) Stop Generation: DONE
 8) Expanded Progress: DONE
 
+Working:
+1) Profile and Sign out 

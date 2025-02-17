@@ -32,9 +32,9 @@ export const ChatInterface = () => {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const { toast } = useToast();
   const abortControllerRef = useRef<AbortController | null>(null);
-
   const accumulatedContentRef = useRef("");
 
+  // Fetch conversations when user loads
   useEffect(() => {
     const fetchConversations = async () => {
       if (!user) return;
@@ -69,83 +69,22 @@ export const ChatInterface = () => {
     }
   }, [user, toast]);
 
-  const saveConversations = async () => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('conversations')
-        .upsert(
-          conversations.map(conv => ({
-            ...conv,
-            user_id: user.id,
-            updated_at: new Date().toISOString()
-          }))
-        );
-
-      if (error) throw error;
-    } catch (error) {
-      console.error("Error saving conversations:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save conversations",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDeleteConversation = async (id: string) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('conversations')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      setConversations((prevConversations) => {
-        const updatedConversations = prevConversations.filter(
-          (conv) => conv.id !== id
-        );
-
-        if (activeConversationId === id) {
-          if (updatedConversations.length > 0) {
-            setActiveConversationId(updatedConversations[0].id);
-          } else {
-            const newConversation = { id: uuidv4(), messages: [] };
-            setActiveConversationId(newConversation.id);
-            return [newConversation];
-          }
+  // This callback simply updates ChatInterface's state after deletion.
+  const removeConversationFromState = (id: string) => {
+    setConversations((prevConversations) => {
+      const updated = prevConversations.filter((conv) => conv.id !== id);
+      if (activeConversationId === id) {
+        if (updated.length > 0) {
+          setActiveConversationId(updated[0].id);
+        } else {
+          const newConversation = { id: uuidv4(), messages: [] };
+          setActiveConversationId(newConversation.id);
+          return [newConversation];
         }
-        return updatedConversations;
-      });
-
-      toast({
-        title: "Success",
-        description: "Conversation deleted successfully",
-      });
-    } catch (error) {
-      console.error("Error deleting conversation:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete conversation",
-        variant: "destructive",
-      });
-    }
+      }
+      return updated;
+    });
   };
-
-  useEffect(() => {
-    if (user && conversations.length > 0) {
-      const timeoutId = setTimeout(() => {
-        saveConversations();
-      }, 1000);
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [conversations, user]);
 
   const handleStopGeneration = () => {
     if (abortControllerRef.current) {
@@ -292,8 +231,9 @@ export const ChatInterface = () => {
         conversations={conversations}
         activeConversationId={activeConversationId}
         onSelect={setActiveConversationId}
-        onDelete={handleDeleteConversation}
+        onDelete={removeConversationFromState} // ChatInterface simply passes this prop
         onNewChat={handleNewChat}
+        user = {user}
       />
 
       <div className="flex-1 overflow-hidden flex flex-col">

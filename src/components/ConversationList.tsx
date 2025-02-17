@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "./ui/button";
+import supabase from "@/lib/supabase";
 
 interface Conversation {
   id: string;
@@ -18,6 +19,7 @@ interface ConversationListProps {
   onSelect: (id: string) => void;
   onDelete: (id: string) => void;
   onNewChat: () => void;
+  user: { id: string };
 }
 
 export const ConversationList = ({
@@ -26,6 +28,7 @@ export const ConversationList = ({
   onSelect,
   onDelete,
   onNewChat,
+  user,
 }: ConversationListProps) => {
   const { toast } = useToast();
   const conversationsRef = useRef(conversations);
@@ -35,71 +38,49 @@ export const ConversationList = ({
   }, [conversations]);
 
   const saveConversations = async () => {
+    if (!user) return;
+
     try {
-      console.log("Attempting to save conversations:", conversationsRef.current);
-      const response = await fetch("/api/save-conversations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversations: conversationsRef.current }),
-      });
+      const { error } = await supabase
+        .from('conversations')
+        .upsert(
+          conversations.map(conv => ({
+            ...conv,
+            user_id: user.id,
+            updated_at: new Date().toISOString()
+          }))
+        );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to save conversations");
-      }
-
-      console.log("Conversations saved successfully!");
-      // toast({
-      //   title: "Saved",
-      //   description: "Your conversations have been saved",
-      // });
+      if (error) throw error;
     } catch (error) {
       console.error("Error saving conversations:", error);
       toast({
         title: "Error",
-        description: "Conversation Failed To Save.",
+        description: "Failed to save conversations",
         variant: "destructive",
       });
     }
   };
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (conversationsRef.current.length > 0) {
+    if (user && conversations.length > 0) {
+      const timeoutId = setTimeout(() => {
         saveConversations();
-      }
-    }, 300000); // 300,000 ms = 5 minutes
+      }, 1000);
 
-    return () => clearInterval(intervalId);
-  }, []);
-
-  const handleDeleteConversation = async (id: string) => {
-    try {
-      const response = await fetch("/api/delete-conversation", {
-        method: "DELETE",
-        headers: { 
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ id }),
-      });
-
-
-    if (response.status === 404) {
-      // Handle 404 error specifically
-      console.warn("Conversation not found, Deleting from Frontend");
-      onDelete(id);
-      toast({
-        title: "Deleted",
-        description: "Conversation has been removed",
-      });
-      return;
+      return () => clearTimeout(timeoutId);
     }
+  }, [conversations, user]);
 
-      if (!response.ok) {
-        throw new Error("Failed to delete conversation");
-      }
-      console.log("Conversation deleted successfully!");
+  const handleDeleteConversation = async (id: string, user: { id: string }) => {
+    try {
+      const { error } = await supabase
+        .from('conversations')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
       toast({
         title: "Deleted",
         description: "Conversation has been removed",
@@ -152,7 +133,7 @@ export const ConversationList = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleDeleteConversation(conversation.id);
+                    handleDeleteConversation(conversation.id, { id: user.id });
                   }}
                   className="absolute right-4 top-1/2 transform -translate-y-1/2 text-red-500 hover:text-red-700"
                 >
