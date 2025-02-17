@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useToast } from "./ui/use-toast";
+import { useRouter } from 'next/router';
 
 export const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -11,6 +12,7 @@ export const LoginForm = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const { signIn, signUp } = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +29,7 @@ export const LoginForm = () => {
           title: "Welcome back!",
           description: "Successfully signed in",
         });
+        router.push('/chat');
       }
     } catch (error) {
       toast({
@@ -90,3 +93,4 @@ export const LoginForm = () => {
     </div>
   );
 };
+
