@@ -19,10 +19,7 @@ export const LoginForm = () => {
     try {
       if (isSignUp) {
         await signUp(email, password);
-        toast({
-          title: "Account created",
-          description: "Please check your email to verify your account",
-        });
+        router.push('/verify-email');
       } else {
         await signIn(email, password);
         toast({
@@ -73,7 +70,7 @@ export const LoginForm = () => {
           </div>
 
           <div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="bg-[#F4511E] w-full">
               {isSignUp ? "Sign up" : "Sign in"}
             </Button>
           </div>
@@ -93,4 +90,3 @@ export const LoginForm = () => {
     </div>
   );
 };
-

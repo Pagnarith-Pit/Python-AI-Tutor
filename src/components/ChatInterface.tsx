@@ -26,7 +26,7 @@ export const ChatInterface = () => {
     isStreaming,
     handleSendMessage,
     handleStopGeneration
-  } = useChat(setConversations, activeConversationId);
+  } = useChat(setConversations, activeConversationId, conversations);
 
   useEffect(() => {
     if (user) {

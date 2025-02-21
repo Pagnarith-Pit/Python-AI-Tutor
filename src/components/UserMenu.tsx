@@ -1,4 +1,4 @@
-
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { UserRound, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "./ui/use-toast";
 
 export const UserMenu = () => {
+  const router = useRouter();
   const { signOut } = useAuth();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
@@ -19,6 +20,7 @@ export const UserMenu = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
+      router.push("/");
       toast({
         title: "Signed out",
         description: "Successfully signed out of your account",

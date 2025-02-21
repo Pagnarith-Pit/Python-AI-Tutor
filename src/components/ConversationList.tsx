@@ -105,7 +105,7 @@ export const ConversationList = ({
           className="w-full rounded-lg py-6 text-base font-medium"
           onClick={onNewChat}
         >
-          Start A New Chat
+          Start A New Problem
         </Button>
       </div>
 

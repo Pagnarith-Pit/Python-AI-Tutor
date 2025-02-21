@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { formatContent } from "@/components/Message";
 
+
 interface Message {
   role: "user" | "assistant";
   content: string;
@@ -12,7 +13,8 @@ export const useChat = (
   setConversations: (
     updater: (prevConversations: any[]) => any[]
   ) => void,
-  activeConversationId: string
+  activeConversationId: string,
+  conversations: any[]
 ) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -33,6 +35,19 @@ export const useChat = (
     const userMessage: Message = { role: "user", content };
     const assistantMessage: Message = { role: "assistant", content: "" };
 
+    // Find the current conversation
+    const currentConversation = conversations.find(conv => conv.id === conversationId);
+    if (!currentConversation) {
+      console.error("Conversation not found");
+      return;
+    }
+
+    // Create updated conversation with the new user message
+    const updatedConversation = {
+      ...currentConversation,
+      messages: [...currentConversation.messages, userMessage]
+    };
+
     setConversations((prevConversations) =>
       prevConversations.map((conv) =>
         conv.id === conversationId
@@ -48,15 +63,11 @@ export const useChat = (
       abortControllerRef.current = new AbortController();
       const signal = abortControllerRef.current.signal;
 
-      // Create a full record of the conversation so far
       const requestBody = JSON.stringify({
-        message: {
-          ...updatedConversation,
-          messages: [...updatedConversation.messages, userMessage],
-        },
+        message: updatedConversation
       });
 
-      const response = await fetch("http://localhost:8000/chat", {
+      const response = await fetch(`http://localhost:${process.env.NEXT_PUBLIC_FASTAPI_PORT}/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -113,7 +124,13 @@ export const useChat = (
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
           console.log('Fetch aborted');
-        } else {
+        } else if (error.message.includes('Failed to fetch') || error.message.includes('ECONNREFUSED')) {
+          console.error("Server connection failed:", error);
+          toast({
+            title: "Connection Error",
+            description: "Cannot connect to AI server. Please ensure it's running on port " + process.env.NEXT_PUBLIC_FASTAPI_PORT,
+            variant: "destructive",
+          });} else {
           console.error("Error in chat:", error);
           toast({
             title: "Error",

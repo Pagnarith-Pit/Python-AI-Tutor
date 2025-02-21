@@ -6,6 +6,20 @@
 6) Streaming: the output should stream out to be displayed: DONE
 7) Stop Generation: DONE
 8) Expanded Progress: DONE
+9) Sign Out: DONE
+10) Move supabase from hosting to local through Docker: DONE
+
+Moving In
 
 Working:
-1) Profile and Sign out 
+** App Related:
+2) Host supabase and NextJS as separate container with bridge network, and NGINX
+as reverse proxy to 
+3) The AI tutor should also be a container, such that when it fails, it spins back up
+4) Contact Us Page : send information to backend to receive email
+
+
+** AI Tutor Related:
+1) AI Tutor - Come Up with Solutions-Steps
+2) New Starting Page after clicking newChat. It should say "Problem: ", "Related Concept This Week: "
+3) Progress Graph in DIV section

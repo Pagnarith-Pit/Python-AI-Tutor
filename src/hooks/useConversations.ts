@@ -71,6 +71,19 @@ export const useConversations = () => {
   };
 
   const createNewChat = () => {
+    // Check if there's already an empty conversation
+    const hasEmptyChat = conversations.some(conv => conv.messages.length === 0);
+    
+    if (hasEmptyChat) {
+      // Find the empty conversation and set it as active
+      const emptyChat = conversations.find(conv => conv.messages.length === 0);
+      if (emptyChat) {
+        setActiveConversationId(emptyChat.id);
+      }
+      return; // Don't create a new chat
+    }
+
+    // If no empty chat exists, create a new one
     const newConversation = {
       id: uuidv4(),
       messages: [],

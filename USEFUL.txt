@@ -1,0 +1,2 @@
+### Run Docker
+docker compose --env-file /Users/ppit/Desktop/socraticbot/.env.local up -d
