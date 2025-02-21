@@ -38,40 +38,56 @@ export const LoginForm = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8">
+    <div className="flex min-h-screen items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-xl space-y-12 bg-white p-12 rounded-2xl shadow-2xl">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
-            {isSignUp ? "Create your account" : "Sign in to your account"}
+          <h2 className="text-center text-4xl font-bold tracking-tight text-gray-900 mb-4">
+            {isSignUp ? "Create your account" : "Welcome back"}
           </h2>
+          <p className="text-center text-lg text-gray-600">
+            {isSignUp 
+              ? "Start your journey with us" 
+              : "Please enter your details to sign in"}
+          </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4 rounded-md shadow-sm">
+        <form className="space-y-8" onSubmit={handleSubmit}>
+          <div className="space-y-6">
             <div>
+              <label htmlFor="email" className="block text-lg font-medium text-gray-700 mb-2">
+                Email address
+              </label>
               <Input
+                id="email"
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email address"
-                className="w-full"
+                placeholder="Enter your email"
+                className="w-full h-14 text-lg px-4"
               />
             </div>
             <div>
+              <label htmlFor="password" className="block text-lg font-medium text-gray-700 mb-2">
+                Password
+              </label>
               <Input
+                id="password"
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-                className="w-full"
+                placeholder="Enter your password"
+                className="w-full h-14 text-lg px-4"
               />
             </div>
           </div>
 
           <div>
-            <Button type="submit" className="bg-[#F4511E] w-full">
-              {isSignUp ? "Sign up" : "Sign in"}
+            <Button 
+              type="submit" 
+              className="w-full h-14 text-lg bg-[#F4511E] hover:bg-[#E64A19] transition-colors"
+            >
+              {isSignUp ? "Create Account" : "Sign in"}
             </Button>
           </div>
         </form>
@@ -79,7 +95,7 @@ export const LoginForm = () => {
           <Button
             variant="link"
             onClick={() => setIsSignUp(!isSignUp)}
-            className="text-sm"
+            className="text-lg text-[#F4511E] hover:text-[#E64A19]"
           >
             {isSignUp
               ? "Already have an account? Sign in"
@@ -90,4 +106,3 @@ export const LoginForm = () => {
     </div>
   );
 };
-
