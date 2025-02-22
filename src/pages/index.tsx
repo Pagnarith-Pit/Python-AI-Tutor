@@ -80,13 +80,13 @@ export default function Home() {
             We'll be guiding you through challenges, reinforcing key concepts, and ensuring you truly understand. With just the right balance of support and challenge, you'll not only learn to code — you’ll learn to code well.
             </p>
           </div>
-          <div className="flex-1">
+          <div className="flex-1 max-w-[800px]"> {/* Add specific max-width */}
             <Image
-              src="/University.png"
+              src="/Uni-Large.png"
               alt="Python University"
-              width={500}
-              height={300}
-              className="w-full h-auto"
+              width={3616}
+              height={2078}
+              className="w-full h-auto object-contain"
             />
           </div>
         </div>
