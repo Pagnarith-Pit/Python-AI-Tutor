@@ -82,8 +82,8 @@ export default function Home() {
           </div>
           <div className="flex-1">
             <Image
-              src="/Main.png"
-              alt="Python Teacher"
+              src="/University.png"
+              alt="Python University"
               width={500}
               height={300}
               className="w-full h-auto"
