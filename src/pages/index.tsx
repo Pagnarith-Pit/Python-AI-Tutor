@@ -1,3 +1,4 @@
+
 import { useRef } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
@@ -66,27 +67,27 @@ export default function Home() {
 
       {/* Career Section */}
       <section className="bg-white text-[#1A1F2C] py-32 px-4">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
-          <div className="flex-1 text-center md:text-left">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12">
+          <div className="flex-1 text-center md:text-left max-w-xl">
             <h2 className="text-4xl font-bold mb-4">
               Our <span className="text-[#F4511E]">Mission</span>
             </h2>
             <p className="text-gray-600 mb-4 text-lg">
-            Learning to code is tough. It’s like picking up a whole new language. The problem? AI tools like ChatGPT and Deepseek make it too easy. After all, they weren’t built to teach, just to assist. And that’s where we come in.
-              
+              Learning to code is tough. It's like picking up a whole new language. The problem? AI tools like ChatGPT and Deepseek make it too easy. After all, they weren't built to teach, just to assist. And that's where we come in.
             </p>
             <p className="text-gray-700 text-lg">
-            Our specialised AI tutor doesn’t just give you answers. No, we help you think like a programmer. Our AI is designed to <span className="text-[#F4511E] font-bold underline">TEACH</span>. 
-            We'll be guiding you through challenges, reinforcing key concepts, and ensuring you truly understand. With just the right balance of support and challenge, you'll not only learn to code — you’ll learn to code well.
+              Our specialised AI tutor doesn't just give you answers. No, we help you think like a programmer. Our AI is designed to <span className="text-[#F4511E] font-bold underline">TEACH</span>. 
+              We'll be guiding you through challenges, reinforcing key concepts, and ensuring you truly understand. With just the right balance of support and challenge, you'll not only learn to code — you'll learn to code well.
             </p>
           </div>
-          <div className="flex-1 max-w-[800px]"> {/* Add specific max-width */}
+          <div className="flex-1 relative min-h-[400px] md:min-h-[600px] w-full">
             <Image
               src="/Uni-Large.png"
               alt="Python University"
-              width={3616}
-              height={2078}
-              className="w-full h-auto object-contain"
+              fill
+              style={{ objectFit: 'contain' }}
+              priority
+              className="!relative"
             />
           </div>
         </div>
