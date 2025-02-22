@@ -10,7 +10,7 @@ export default function Login() {
     <div className="min-h-screen bg-[#1A1F2C] relative">
       <Button
         variant="ghost"
-        className="absolute top-4 left-4 text-white hover:text-gray-300"
+        className="absolute top-20 left-20 text-white hover:text-gray-300 text-xl"
         onClick={() => router.push('/')}
       >
         <ArrowLeft className="h-6 w-6 mr-2" />
