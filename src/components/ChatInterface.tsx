@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { LoginForm } from "./LoginForm";
 import { useConversations } from "@/hooks/useConversations";
 import { useChat } from "@/hooks/useChat";
+import ProblemForm from "./NewProblemForm";
 
 export const ChatInterface = () => {
   const { user, loading: authLoading } = useAuth();
@@ -63,17 +64,30 @@ export const ChatInterface = () => {
       />
 
       <div className="flex-1 overflow-hidden flex flex-col">
-        <MessageList 
-          messages={activeConversation.messages} 
-          isLoading={isLoading} 
-        />
-        {activeConversation?.messages?.length > 0 && (
-          <MessageInput 
-            onSend={handleSendMessage} 
-            onStop={handleStopGeneration}
-            disabled={isLoading} 
-            isGenerating={isStreaming}
-          />
+        {activeConversation?.messages?.length > 0 ? (
+          <>
+            <MessageList 
+              messages={activeConversation.messages} 
+              isLoading={isLoading} 
+            />
+            <MessageInput 
+              onSend={handleSendMessage} 
+              onStop={handleStopGeneration}
+              disabled={isLoading} 
+              isGenerating={isStreaming}
+            />
+          </>
+        ) : (
+          <div className="flex-1 overflow-y-auto">
+            <div className="h-full flex bg-background items-center justify-center">
+              <div className="text-center mt-[10%]">
+                <ProblemForm 
+                  user={user} 
+                  activeConversationId={activeConversationId}
+                />
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

@@ -27,7 +27,7 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
       {messages.length === 0 ? (
         <div className="h-full flex bg-background items-center justify-center">
         <div className="text-center mt-[10%]">
-          <ProblemForm />
+          <p>Placeholder</p>
         </div>
       </div>
       ) : (

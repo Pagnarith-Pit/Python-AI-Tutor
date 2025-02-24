@@ -34,7 +34,27 @@ def createClient(api_key):
 
     return client
 
-async def generate(client, input, request: Request):
+client = createClient(API_KEY)
+
+# Creating Solution from Thinking Model
+async def generate_solution(message: ChatMessage):
+    # Processing Message4
+    input_concept = message.message['messages']['concept']
+    input_problemDesc = message.message['messages']['problemDesc']
+
+    # Creating the input
+    # Here is where we can add the concept and problem description 
+    # SYSTEM_PROMPT = "Create a solution for the following problem statement, 
+    # Fcous on these concepts, Follow this format [{Step 1: }, {Step 2: } "
+
+    # Getting the response
+    completion = await client.chat.completions.create(
+        model= MODEL_THINK,
+        messages = input )
+    return(completion.choices[0].message)
+
+# Creating Chat from NoThinking Model - Streaming
+async def generate_chat(client, input, request: Request):
     loop = asyncio.get_running_loop()
     queue = asyncio.Queue()
     is_disconnected = False
@@ -84,24 +104,45 @@ async def generate(client, input, request: Request):
             # The thread will eventually terminate since it's a daemon thread
             print("Cleaning up worker thread")
 
-client = createClient(API_KEY)
-
 @app.post("/createSolution")
-async def chat(request: Request, message: ChatMessage):
-    SYSTEM_PROMPT = "Create a solution for the following problem statement, Fcous on these concepts, Follow this format [{Step 1: }, {Step 2: } "
-    input = message.message['messages']
-    generator = generate(client, input, request)
+async def create_Solution(request: Request, message: ChatMessage):
+    # AI_response = generate_solution(client, message).content.split("</think>")
+    ## Dummy
+    AI_response = f"""<think>
+                    Let me analyze this problem step by step:
 
-    return EventSourceResponse(
-        generator,
-        media_type="text/event-stream",
-        ping=20000  # Send a ping every 20 seconds to keep the connection alive
-    )
+                    1. Understanding the Concepts:
+                    - Key concept: {message.message['messages']['concept']}
+                    - This will be important for structuring our solution
+
+                    2. Problem Analysis:
+                    - Problem statement: {message.message['messages']['problemDesc']}
+                    - Breaking this down into manageable parts
+                    
+                    3. Solution Approach:
+                    - Will implement using Python best practices
+                    - Focus on readability and efficiency
+                    </think>
+                    Here's a solution to your problem:
+
+                    ```python
+                    def example_solution():
+                        # Implementation based on {message.message['messages']['concept']}
+                        result = "Sample implementation"
+                        return result
+
+                    # Usage example:
+                    example_solution()"""
+    AI_response = AI_response.split("</think>")
+    AI_think = AI_response[0]
+    AI_answer = AI_response[1]
+    
+    return {"model_reasoning": AI_think, "response": AI_answer}
 
 @app.post("/chat")
 async def chat(request: Request, message: ChatMessage):
     input = message.message['messages']
-    generator = generate(client, input, request)
+    generator = generate_chat(client, input, request)
 
     return EventSourceResponse(
         generator,

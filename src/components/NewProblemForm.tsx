@@ -1,23 +1,94 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, ArrowLeft } from 'lucide-react';
+import supabase from "@/lib/supabase";
+import { useToast } from "@/components/ui/use-toast";
+import { LoginForm } from './LoginForm';
 
-const ProblemForm = () => {
+interface NewProblemFormProps {
+    user: { id: string };
+    activeConversationId: string;
+}
+
+const ProblemForm = ({ user, activeConversationId }: NewProblemFormProps) => {
+    if (!user) {
+        return <LoginForm />;
+    }
+
+    const { toast } = useToast();
     const [formData, setFormData] = useState({
         concept: '',
         problemDesc: '',
-      });
+    });
+
+    const saveConversations = async (model_reasoning: string, model_answer: string) => {
+        try {
+          const { error } = await supabase
+            .from('conversations')
+            .upsert({
+                id: activeConversationId,
+                user_id: user.id,
+                model_think: model_reasoning,
+                model_solution: model_answer,
+                progress: 0,
+                created_at: new Date().toISOString(),
+              });
     
-      const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // Here you would typically send the data to your backend
-        setFormData({ concept: '', problemDesc: ''});
+          if (error) throw error;
+        } catch (error) {
+          console.error("Error saving conversations at start:", error);
+          toast({
+            title: "Error",
+            description: "Failed to save conversations at start",
+            variant: "destructive",
+          });
+        }
       };
     
-      const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        try {
+            const response = await fetch(`http://localhost:${process.env.NEXT_PUBLIC_FASTAPI_PORT}/createSolution`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: {
+                        messages: formData
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Reset form after successful submission
+            setFormData({ concept: '', problemDesc: '' });
+
+            // Handle the response
+            const data = await response.json();
+
+            // Save this response to the database
+            const model_reasoning = data.model_reasoning;
+            const model_answer = data.response
+
+            saveConversations(model_reasoning, model_answer);
+
+
+        } catch (error) {
+            console.error('Error:', error);
+            // You might want to show an error toast here
+        }
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
-      };
+    };
+
   return (
     <div className="min-h-screen bg-background">
         <motion.div
