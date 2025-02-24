@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { Message } from "./Message";
 import { LoadingMessage } from "./LoadingMessage";
 import { LoadingDots } from "./LoadingDots";
+import ProblemForm from "./NewProblemForm";
 
 interface MessageType {
   role: "user" | "assistant";
@@ -25,7 +26,7 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
     <div className="flex-1 overflow-y-auto">
       {messages.length === 0 ? (
         <div className="h-full flex items-center justify-center text-gray-500">
-          <p>Start a conversation by typing a message below.</p>
+          <ProblemForm />
         </div>
       ) : (
         <>
