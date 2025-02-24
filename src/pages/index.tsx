@@ -80,9 +80,9 @@ export default function Home() {
               We'll be guiding you through challenges, reinforcing key concepts, and ensuring you truly understand. With just the right balance of support and challenge, you'll not only learn to code — you'll learn to code well.
             </p>
           </div>
-          <div className="flex-1 relative min-h-[400px] md:min-h-[600px] w-full">
+          <div className="flex-1 relative min-h-[500px] md:min-h-[500px] w-full max-w-2xl">
             <Image
-              src="/Uni-Large.png"
+              src="/Uni500.jpg"
               alt="Python University"
               fill
               style={{ objectFit: 'contain' }}
