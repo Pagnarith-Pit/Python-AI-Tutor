@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import supabase from "@/lib/supabase";
+import { set } from "date-fns";
 
 interface Message {
   role: "user" | "assistant";
@@ -13,17 +14,17 @@ interface Message {
 interface Conversation {
   id: string;
   messages: Message[];
+  model_think: string;
+  model_solution: string;
+  progress: number;
 }
 
 export const useConversations = () => {
   const { user } = useAuth();
-  const [conversations, setConversations] = useState<Conversation[]>([
-    { id: uuidv4(), messages: [] }
-  ]);
-  const [activeConversationId, setActiveConversationId] = useState<string>(
-    conversations[0].id
-  );
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<string>("");
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+
   const { toast } = useToast();
 
   const fetchConversations = async () => {
@@ -38,13 +39,13 @@ export const useConversations = () => {
 
       if (error) throw error;
 
-      if (data && data.length >= 1 && data[0].messages.length > 0) {
+      if (data && data.length >= 1) {
         setConversations(data);
         setActiveConversationId(data[0].id);
       } 
       else {
         // If nothing exist, create that form
-        // createNewChat();
+        createNewChat();
       }
     } catch (error) {
       console.error("Error loading conversations:", error);
@@ -65,7 +66,7 @@ export const useConversations = () => {
         if (updated.length > 0) {
           setActiveConversationId(updated[0].id);
         } else {
-          const newConversation = { id: uuidv4(), messages: [] };
+          const newConversation = { id: uuidv4(), messages: [], model_think: '', model_solution: '', progress: 0 };
           setActiveConversationId(newConversation.id);
           return [newConversation];
         }
@@ -91,6 +92,9 @@ export const useConversations = () => {
     const newConversation = {
       id: uuidv4(),
       messages: [],
+      model_think: '',
+      model_solution: '',
+      progress: 0
     };
 
     setConversations((prev) => [...prev, newConversation]);
@@ -105,6 +109,6 @@ export const useConversations = () => {
     createNewChat,
     fetchConversations,
     isInitialLoad,
-    setConversations
+    setConversations,
   };
 };

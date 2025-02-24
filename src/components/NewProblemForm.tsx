@@ -4,6 +4,7 @@ import { Send, ArrowLeft } from 'lucide-react';
 import supabase from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { LoginForm } from './LoginForm';
+import { useConversations } from "@/hooks/useConversations";
 
 interface NewProblemFormProps {
     user: { id: string };
@@ -14,6 +15,10 @@ const ProblemForm = ({ user, activeConversationId }: NewProblemFormProps) => {
     if (!user) {
         return <LoginForm />;
     }
+
+    const {
+        setConversations
+      } = useConversations();
 
     const { toast } = useToast();
     const [formData, setFormData] = useState({
@@ -75,8 +80,17 @@ const ProblemForm = ({ user, activeConversationId }: NewProblemFormProps) => {
             const model_reasoning = data.model_reasoning;
             const model_answer = data.response
 
-            saveConversations(model_reasoning, model_answer);
 
+            // Update the conversation state locally
+            setConversations((prevConversations) =>
+                prevConversations.map((conv) =>
+                conv.id === activeConversationId
+                    ? { ...conv, model_solution: model_answer, model_think: model_reasoning }
+                    : conv
+                )
+            );
+
+            saveConversations(model_reasoning, model_answer);
 
         } catch (error) {
             console.error('Error:', error);
