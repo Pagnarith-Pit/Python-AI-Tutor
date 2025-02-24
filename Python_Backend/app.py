@@ -86,6 +86,18 @@ async def generate(client, input, request: Request):
 
 client = createClient(API_KEY)
 
+@app.post("/createSolution")
+async def chat(request: Request, message: ChatMessage):
+    SYSTEM_PROMPT = "Create a solution for the following problem statement, Fcous on these concepts, Follow this format [{Step 1: }, {Step 2: } "
+    input = message.message['messages']
+    generator = generate(client, input, request)
+
+    return EventSourceResponse(
+        generator,
+        media_type="text/event-stream",
+        ping=20000  # Send a ping every 20 seconds to keep the connection alive
+    )
+
 @app.post("/chat")
 async def chat(request: Request, message: ChatMessage):
     input = message.message['messages']

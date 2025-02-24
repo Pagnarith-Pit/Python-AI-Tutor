@@ -67,6 +67,8 @@ export const useChat = (
         message: updatedConversation
       });
 
+      console.log("Request body:", requestBody);
+
       const response = await fetch(`http://localhost:${process.env.NEXT_PUBLIC_FASTAPI_PORT}/chat`, {
         method: "POST",
         headers: {

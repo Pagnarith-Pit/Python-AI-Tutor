@@ -38,9 +38,13 @@ export const useConversations = () => {
 
       if (error) throw error;
 
-      if (data && data.length > 0) {
+      if (data && data.length >= 1 && data[0].messages.length > 0) {
         setConversations(data);
         setActiveConversationId(data[0].id);
+      } 
+      else {
+        // If nothing exist, create that form
+        // createNewChat();
       }
     } catch (error) {
       console.error("Error loading conversations:", error);
@@ -88,6 +92,7 @@ export const useConversations = () => {
       id: uuidv4(),
       messages: [],
     };
+
     setConversations((prev) => [...prev, newConversation]);
     setActiveConversationId(newConversation.id);
   };
