@@ -17,9 +17,10 @@ Working:
 as reverse proxy to 
 3) The AI tutor should also be a container, such that when it fails, it spins back up
 4) Contact Us Page : send information to backend to receive email
-5) New Chat Formattin
-- On MessageList Component line 28, it checks if the message length is 0. Here, we can display the form.
-- The form can be a component, which calls the createSolution API with its content
+
+5) New Chat Formatting
+- use UseChat hook to get conversations.solution, then find current active solution = model_solution[progress]
+- Based on this conversation, create a tree and send message to AI
 
 
 ** AI Tutor Related:

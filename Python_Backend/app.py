@@ -109,30 +109,12 @@ async def create_Solution(request: Request, message: ChatMessage):
     # AI_response = generate_solution(client, message).content.split("</think>")
     ## Dummy
     AI_response = f"""<think>
-                    Let me analyze this problem step by step:
-
-                    1. Understanding the Concepts:
                     - Key concept: {message.message['messages']['concept']}
-                    - This will be important for structuring our solution
-
-                    2. Problem Analysis:
                     - Problem statement: {message.message['messages']['problemDesc']}
-                    - Breaking this down into manageable parts
-                    
-                    3. Solution Approach:
-                    - Will implement using Python best practices
-                    - Focus on readability and efficiency
                     </think>
                     Here's a solution to your problem:
-
-                    ```python
-                    def example_solution():
-                        # Implementation based on {message.message['messages']['concept']}
-                        result = "Sample implementation"
-                        return result
-
-                    # Usage example:
-                    example_solution()"""
+                    """
+    
     AI_response = AI_response.split("</think>")
     AI_think = AI_response[0]
     AI_answer = AI_response[1]
