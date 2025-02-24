@@ -25,9 +25,11 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
   return (
     <div className="flex-1 overflow-y-auto">
       {messages.length === 0 ? (
-        <div className="h-full flex items-center justify-center text-gray-500">
+        <div className="h-full flex bg-background items-center justify-center">
+        <div className="text-center mt-[10%]">
           <ProblemForm />
         </div>
+      </div>
       ) : (
         <>
           {messages.map((message, index) => (

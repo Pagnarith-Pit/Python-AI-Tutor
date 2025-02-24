@@ -67,12 +67,14 @@ export const ChatInterface = () => {
           messages={activeConversation.messages} 
           isLoading={isLoading} 
         />
-        <MessageInput 
-          onSend={handleSendMessage} 
-          onStop={handleStopGeneration}
-          disabled={isLoading} 
-          isGenerating={isStreaming}
-        />
+        {activeConversation?.messages?.length > 0 && (
+          <MessageInput 
+            onSend={handleSendMessage} 
+            onStop={handleStopGeneration}
+            disabled={isLoading} 
+            isGenerating={isStreaming}
+          />
+        )}
       </div>
     </div>
   );
