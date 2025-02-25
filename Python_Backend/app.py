@@ -47,14 +47,44 @@ async def generate_solution(client, message: ChatMessage):
     # Here is where we can add the concept and problem description 
     # SYSTEM_PROMPT = "Create a solution for the following problem statement, 
     # Fcous on these concepts, Follow this format [{Step 1: }, {Step 2: } "
-    input = [{"role": "user", "content": "What is your name"}]
 
-    
+    input = [{"role": "user", "content": "Here are your requirements. You are to come up with step by step solution to the following problem statement: " + input_problemDesc + " and focus on the following concepts: " + input_concept}]
+
     # Getting the response
     completion = client.chat.completions.create(
         model= MODEL_NOTHINK,
         messages = input )
     return(completion.choices[0].message)
+
+@app.post("/createSolution")
+async def create_Solution(message: ChatMessage):
+    AI_response = await generate_solution(client, message)
+    AI_response = AI_response.content.split("</think>")
+    AI_think = AI_response[0]
+    AI_answer = AI_response[1]
+    
+    print(AI_response)
+    return {"model_reasoning": AI_think, "response": AI_answer}
+
+# Creating Solution from Thinking Model
+async def check_response(client, message: ChatMessage, correct_answer: str):
+    input = "Add prompt for AI to consider whether student is right or wrong. If wrong, generate why student is wrong and strategy to use. If right, generate correct message and reflection, and strategy is 'START'"
+    ## Format the solution to {student_mistake: text, strategy: text}
+    AI_response = await generate_solution(client, input)
+    AI_response = AI_response.content.split("</think>")
+    # AI_think = AI_response[0]
+    AI_answer = AI_response[1]
+
+    # Extract the student mistake and strategy 
+    # ------------------------------
+    student_mistake = "Why student is wrong"
+    strategy = "What strategy to use"
+    # ------------------------------
+
+    if student_mistake == "CORRECT":
+        strategy = "START"
+
+    return [student_mistake, strategy]
 
 # Creating Chat from NoThinking Model - Streaming
 async def generate_chat(client, input, request: Request):
@@ -107,29 +137,22 @@ async def generate_chat(client, input, request: Request):
             # The thread will eventually terminate since it's a daemon thread
             print("Cleaning up worker thread")
 
-@app.post("/createSolution")
-async def create_Solution(message: ChatMessage):
-    AI_response = await generate_solution(client, message)
-    AI_response = AI_response.content
-    # AI_response = generate_solution(client, message).content.split("</think>")
-    #AI_response = AI_response.split("</think>")
-    # ## Dummy
-    # AI_response = f"""<think>
-    #                 - Key concept: {message.message['messages']['concept']}
-    #                 - Problem statement: {message.message['messages']['problemDesc']}
-    #                 </think>
-    #                 Here's a solution to your problem:
-    #                 """
-    
-    AI_think = AI_response[0]
-    AI_answer = AI_response[1]
-    
-    print(AI_response)
-    return {"model_reasoning": AI_think, "response": AI_answer}
 
 @app.post("/chat")
-async def chat(request: Request, message: ChatMessage):
-    input = message.message['messages']
+async def chat(request: Request, message: ChatMessage, correct_answer: str = "", strategy: str = "", student_mistake: str = ""):
+    ## Prompt the AI to create the question with those inputs
+
+    if student_mistake == "CORRECT":
+        student_mistake = "The student's answer is correct. Congratulate them and move on to the next question."
+        
+    PROMPT = "Create a question based on the following information: " + correct_answer + " and focus on the following concepts: " + strategy + " and the student's mistake is: " + student_mistake
+    message = message.message['messages']
+
+    ## Must work on the prompt to make it more specific
+    # ------------------------------------------------
+    input = [{"role": "user", "content": PROMPT + " " + message}]
+    # ------------------------------------------------
+
     generator = generate_chat(client, input, request)
 
     return EventSourceResponse(

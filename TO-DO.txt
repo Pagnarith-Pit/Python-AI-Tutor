@@ -1,3 +1,12 @@
+##### SUGGESTION ########
+2) Host supabase and NextJS as separate container with bridge network, and NGINX
+as reverse proxy to 
+3) The AI tutor should also be a container, such that when it fails, it spins back up
+##########################
+
+
+
+##### COMPLETED ########
 1) Save function: DONE
 2) Delete function: DONE
 3) Load Conversation from Database: DONE
@@ -8,22 +17,37 @@
 8) Expanded Progress: DONE
 9) Sign Out: DONE
 10) Move supabase from hosting to local through Docker: DONE
+##########################
 
-Moving In
 
-Working:
+
+##### TO BE DONE ########
 ** App Related:
-2) Host supabase and NextJS as separate container with bridge network, and NGINX
-as reverse proxy to 
-3) The AI tutor should also be a container, such that when it fails, it spins back up
 4) Contact Us Page : send information to backend to receive email
-
-5) New Chat Formatting
-- use UseChat hook to get conversations.solution, then find current active solution = model_solution[progress]
-- Based on this conversation, create a tree and send message to AI
-
+5) Display well done image at the end and disable chat
 
 ** AI Tutor Related:
-1) AI Tutor - Come Up with Solutions-Steps
-2) New Starting Page after clicking newChat. It should say "Problem: ", "Related Concept This Week: "
 3) Progress Graph in DIV section
+- use UseChat hook to get conversations.solution, then find current active solution = model_solution[progress]
+- Based on this conversation, create a tree and send message to AI
+##########################
+
+
+
+##### WORKING ON ########
+- Response Loop
+>> Client call createSolution to Think Model on uvicorn port 8080 (Output: {think: text, solution: {Step 1: , Step 2: }})
+>> Pick the first step in solution
+>> Server calls Socrat Model (Output: a question)
+>> Display and Student Response
+>> Client calls checkResponse to Think Model
+
+1) 
+>> If incorrect: (Output: [student_mistake, strategy])
+>> Server calls chat to Socrat Model with inputs (Output: a question)
+2) 
+>> If correct: (Output: [student_mistake: CORRECT, strategy: START])
+>> Move solution forward by one, increase progress by one
+>> Server calls chat to Socrat Model with inputs (Output: a question)
+
+Loop Until End of Progress 
