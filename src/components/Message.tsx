@@ -14,6 +14,13 @@ interface MessageProps {
   isGenerating?: boolean; // added isGenerating prop
 }
 
+/**
+ * @description Message component displays a single message from either the user or the assistant.
+ * @parent MessageList
+ * @child LoadingDots, ReactMarkdown
+ * @output A formatted message with user/assistant indicator.
+ */
+
 // Format content to handle carriage returns and preserve formatting
 export const formatContent = (content: string): string => {
   // Check if the content consists solely of carriage returns.

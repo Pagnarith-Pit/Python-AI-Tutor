@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { LoginForm } from './LoginForm';
@@ -7,6 +6,12 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+/**
+ * @description ProtectedRoute component protects routes by checking user authentication status.
+ * @parent App
+ * @child LoginForm
+ * @output Renders children if the user is authenticated; otherwise, redirects to the LoginForm.
+ */
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, loading } = useAuth();
 

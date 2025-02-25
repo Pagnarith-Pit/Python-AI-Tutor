@@ -11,6 +11,12 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "./ui/use-toast";
 
+/**
+ * @description UserMenu component provides a dropdown menu for user-related actions, specifically signing out.
+ * @parent Header
+ * @child DropdownMenu
+ * @output Dropdown menu with sign-out functionality.
+ */
 export const UserMenu = () => {
   const router = useRouter();
   const { signOut } = useAuth();

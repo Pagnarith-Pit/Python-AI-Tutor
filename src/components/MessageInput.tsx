@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { SendIcon, StopCircle } from "lucide-react";
@@ -11,6 +10,11 @@ interface MessageInputProps {
   isGenerating?: boolean;
 }
 
+/**
+ * @description MessageInput component provides a textarea for typing messages and buttons for sending or stopping message generation.
+ * @parent ChatInterface
+ * @output A form with a textarea and send/stop buttons.
+ */
 export const MessageInput = ({ onSend, onStop, disabled, isGenerating }: MessageInputProps) => {
   const [message, setMessage] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);

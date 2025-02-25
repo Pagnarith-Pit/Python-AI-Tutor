@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from "react";
 import { Message } from "./Message";
 import { LoadingMessage } from "./LoadingMessage";
@@ -14,6 +13,13 @@ interface MessageListProps {
   messages: MessageType[];
   isLoading?: boolean;
 }
+
+/**
+ * @description MessageList component renders a list of messages.
+ * @parent ChatInterface
+ * @child Message
+ * @output A list of Message components.
+ */
 
 export const MessageList = ({ messages, isLoading }: MessageListProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);

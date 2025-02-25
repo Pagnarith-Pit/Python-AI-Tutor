@@ -3,6 +3,12 @@ import { useState, useRef } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { formatContent } from "@/components/Message";
 
+/**
+ * useChat hook:
+ * - Handles sending messages and receiving responses from the AI server.
+ * - Used in: ChatInterface component.
+ * - Calls: useToast, formatContent, fetch to FastAPI endpoint
+ */
 
 interface Message {
   role: "user" | "assistant";

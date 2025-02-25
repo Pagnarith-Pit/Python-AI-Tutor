@@ -1,107 +1,26 @@
-import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Send, ArrowLeft } from 'lucide-react';
-import supabase from "@/lib/supabase";
-import { useToast } from "@/components/ui/use-toast";
+import { Send} from 'lucide-react';
 import { LoginForm } from './LoginForm';
-import { useConversations } from "@/hooks/useConversations";
+import { useHandleSubmit } from "@/hooks/useHandleSubmit";
 
 interface NewProblemFormProps {
     user: { id: string };
     activeConversationId: string;
 }
 
+/**
+ * ProblemForm component:
+ * - Displays a form for the user to input a problem description and concepts to apply.
+ * - Parent: ChatInterface (when no messages exist in the active conversation)
+ * - Children: LoginForm (when user is not logged in)
+ * - Calls: useHandleSubmit
+ */
 const ProblemForm = ({ user, activeConversationId }: NewProblemFormProps) => {
     if (!user) {
         return <LoginForm />;
     }
 
-    const {
-        setConversations
-      } = useConversations();
-
-    const { toast } = useToast();
-    const [formData, setFormData] = useState({
-        concept: '',
-        problemDesc: '',
-    });
-
-    const saveConversations = async (model_reasoning: string, model_answer: string) => {
-        try {
-          const { error } = await supabase
-            .from('conversations')
-            .upsert({
-                id: activeConversationId,
-                user_id: user.id,
-                model_think: model_reasoning,
-                model_solution: model_answer,
-                progress: 0,
-                created_at: new Date().toISOString(),
-              });
-    
-          if (error) throw error;
-        } catch (error) {
-          console.error("Error saving conversations at start:", error);
-          toast({
-            title: "Error",
-            description: "Failed to save conversations at start",
-            variant: "destructive",
-          });
-        }
-      };
-    
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        
-        try {
-            const response = await fetch(`http://localhost:${process.env.NEXT_PUBLIC_FASTAPI_PORT}/createSolution`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    message: {
-                        messages: formData
-                    }
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            // Reset form after successful submission
-            setFormData({ concept: '', problemDesc: '' });
-
-            // Handle the response
-            const data = await response.json();
-
-            // Save this response to the database
-            const model_reasoning = data.model_reasoning;
-            const model_answer = data.response
-
-
-            // Update the conversation state locally
-            setConversations((prevConversations) =>
-                prevConversations.map((conv) =>
-                conv.id === activeConversationId
-                    ? { ...conv, model_solution: model_answer, model_think: model_reasoning }
-                    : conv
-                )
-            );
-
-            saveConversations(model_reasoning, model_answer);
-
-        } catch (error) {
-            console.error('Error:', error);
-            // You might want to show an error toast here
-        }
-    };
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
+    const { formData, handleSubmit, handleChange } = useHandleSubmit(activeConversationId, user.id);
 
   return (
     <div className="min-h-screen bg-background">

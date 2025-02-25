@@ -1,9 +1,9 @@
 import { MessageCircle, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEffect, useRef, useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { useEffect, useRef } from "react";
 import { Button } from "./ui/button";
-import supabase from "@/lib/supabase";
+import { useDeleteConversation } from "@/hooks/useDeleteConversation";
+import { useSaveConversationList } from "@/hooks/useSaveConversationList";
 
 interface Conversation {
   id: string;
@@ -22,6 +22,14 @@ interface ConversationListProps {
   user: { id: string };
 }
 
+/**
+ * ConversationList component:
+ * - Displays a list of conversations.
+ * - Parent: ChatInterface
+ * - Children: None
+ * - Calls: useDeleteConversation, useSaveConversationList
+ */
+
 export const ConversationList = ({
   conversations,
   activeConversationId,
@@ -30,37 +38,13 @@ export const ConversationList = ({
   onNewChat,
   user,
 }: ConversationListProps) => {
-  const { toast } = useToast();
   const conversationsRef = useRef(conversations);
+  const { deleteConversation } = useDeleteConversation();
+  const { saveConversations } = useSaveConversationList(conversations, user.id);
 
   useEffect(() => {
     conversationsRef.current = conversations;
   }, [conversations]);
-
-  const saveConversations = async () => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('conversations')
-        .upsert(
-          conversations.map(conv => ({
-            ...conv,
-            user_id: user.id,
-            updated_at: new Date().toISOString()
-          }))
-        );
-
-      if (error) throw error;
-    } catch (error) {
-      console.error("Error saving conversations:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save conversations",
-        variant: "destructive",
-      });
-    }
-  };
 
   useEffect(() => {
     if (user && conversations.length > 0) {
@@ -71,31 +55,6 @@ export const ConversationList = ({
       return () => clearTimeout(timeoutId);
     }
   }, [conversations, user]);
-
-  const handleDeleteConversation = async (id: string, user: { id: string }) => {
-    try {
-      const { error } = await supabase
-        .from('conversations')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-      toast({
-        title: "Deleted",
-        description: "Conversation has been removed",
-      });
-      // Inform the parent to update the UI.
-      onDelete(id);
-    } catch (error) {
-      console.error("Error deleting conversation:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete conversation. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
@@ -133,7 +92,7 @@ export const ConversationList = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleDeleteConversation(conversation.id, { id: user.id });
+                    deleteConversation(conversation.id, user.id, onDelete);
                   }}
                   className="absolute right-4 top-1/2 transform -translate-y-1/2 text-red-500 hover:text-red-700"
                 >

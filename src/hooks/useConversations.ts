@@ -1,10 +1,8 @@
-
 import { useState, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import supabase from "@/lib/supabase";
-import { set } from "date-fns";
 
 interface Message {
   role: "user" | "assistant";
@@ -19,6 +17,12 @@ interface Conversation {
   progress: number;
 }
 
+/**
+ * useConversations hook:
+ * - Manages the state of conversations and active conversation.
+ * - Used in: ChatInterface component.
+ * - Calls: useAuth, useToast, supabase.from('conversations').select, supabase.from('conversations').upsert
+ */
 export const useConversations = () => {
   const { user } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -111,4 +115,40 @@ export const useConversations = () => {
     isInitialLoad,
     setConversations,
   };
+};
+
+/**
+ * useSaveConversations hook:
+ * - Saves a single conversation to the database.
+ * - Used in: useHandleSubmit, useConversation hook.
+ * - Calls: useToast, supabase.from('conversations').upsert
+ */
+export const useSaveConversations = () => {
+  const { toast } = useToast();
+
+  const saveConversations = async (activeConversationId: string, userId: string, model_reasoning: string, model_answer: string) => {
+    try {
+      const { error } = await supabase
+        .from('conversations')
+        .upsert({
+          id: activeConversationId,
+          user_id: userId,
+          model_think: model_reasoning,
+          model_solution: model_answer,
+          progress: 0,
+          created_at: new Date().toISOString(),
+        });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error saving conversations at start:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save conversations at start",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return { saveConversations };
 };

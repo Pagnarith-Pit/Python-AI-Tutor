@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
@@ -10,6 +9,13 @@ import { useConversations } from "@/hooks/useConversations";
 import { useChat } from "@/hooks/useChat";
 import ProblemForm from "./NewProblemForm";
 
+/**
+ * ChatInterface component:
+ * - Main component that orchestrates the chat interface.
+ * - Parent: None (root component)
+ * - Children: UserMenu, ConversationList, MessageList, MessageInput, LoginForm, ProblemForm
+ * - Calls: useAuth, useConversations, useChat
+ */
 export const ChatInterface = () => {
   const { user, loading: authLoading } = useAuth();
   const {
