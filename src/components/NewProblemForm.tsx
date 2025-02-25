@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Send} from 'lucide-react';
 import { LoginForm } from './LoginForm';
 import { useHandleSubmit } from "@/hooks/useHandleSubmit";
+import { LoadingMessage } from './LoadingMessage';
 
 interface NewProblemFormProps {
     user: { id: string };
@@ -23,6 +24,7 @@ const ProblemForm = ({ user, activeConversationId }: NewProblemFormProps) => {
     const { formData, handleSubmit, handleChange, isLoading } = useHandleSubmit(activeConversationId, user.id);
 
     if (isLoading) {
+      console.log("Loading...");
       return (
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="max-w-2xl mx-auto px-4 w-full">

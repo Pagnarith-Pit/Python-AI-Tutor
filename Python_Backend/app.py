@@ -7,6 +7,7 @@ import asyncio
 import threading
 import os
 from dotenv import load_dotenv
+load_dotenv('/Users/ppit/Desktop/python-pathway-project/.env.local')
 
 app = FastAPI()
 MODEL_THINK = "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"
@@ -37,7 +38,7 @@ def createClient(api_key):
 client = createClient(API_KEY)
 
 # Creating Solution from Thinking Model
-async def generate_solution(message: ChatMessage):
+async def generate_solution(client, message: ChatMessage):
     # Processing Message4
     input_concept = message.message['messages']['concept']
     input_problemDesc = message.message['messages']['problemDesc']
@@ -46,10 +47,12 @@ async def generate_solution(message: ChatMessage):
     # Here is where we can add the concept and problem description 
     # SYSTEM_PROMPT = "Create a solution for the following problem statement, 
     # Fcous on these concepts, Follow this format [{Step 1: }, {Step 2: } "
+    input = [{"role": "user", "content": "What is your name"}]
 
+    
     # Getting the response
-    completion = await client.chat.completions.create(
-        model= MODEL_THINK,
+    completion = client.chat.completions.create(
+        model= MODEL_NOTHINK,
         messages = input )
     return(completion.choices[0].message)
 
@@ -105,20 +108,23 @@ async def generate_chat(client, input, request: Request):
             print("Cleaning up worker thread")
 
 @app.post("/createSolution")
-async def create_Solution(request: Request, message: ChatMessage):
+async def create_Solution(message: ChatMessage):
+    AI_response = await generate_solution(client, message)
+    AI_response = AI_response.content
     # AI_response = generate_solution(client, message).content.split("</think>")
-    ## Dummy
-    AI_response = f"""<think>
-                    - Key concept: {message.message['messages']['concept']}
-                    - Problem statement: {message.message['messages']['problemDesc']}
-                    </think>
-                    Here's a solution to your problem:
-                    """
+    #AI_response = AI_response.split("</think>")
+    # ## Dummy
+    # AI_response = f"""<think>
+    #                 - Key concept: {message.message['messages']['concept']}
+    #                 - Problem statement: {message.message['messages']['problemDesc']}
+    #                 </think>
+    #                 Here's a solution to your problem:
+    #                 """
     
-    AI_response = AI_response.split("</think>")
     AI_think = AI_response[0]
     AI_answer = AI_response[1]
     
+    print(AI_response)
     return {"model_reasoning": AI_think, "response": AI_answer}
 
 @app.post("/chat")
