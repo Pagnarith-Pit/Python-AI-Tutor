@@ -20,7 +20,17 @@ const ProblemForm = ({ user, activeConversationId }: NewProblemFormProps) => {
         return <LoginForm />;
     }
 
-    const { formData, handleSubmit, handleChange } = useHandleSubmit(activeConversationId, user.id);
+    const { formData, handleSubmit, handleChange, isLoading } = useHandleSubmit(activeConversationId, user.id);
+
+    if (isLoading) {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="max-w-2xl mx-auto px-4 w-full">
+            <LoadingMessage />
+          </div>
+        </div>
+      );
+    }
 
   return (
     <div className="min-h-screen bg-background">

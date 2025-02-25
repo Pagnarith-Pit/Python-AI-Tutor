@@ -1,30 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+
+const facts = [
+  "Did you know? The first computer bug was an actual bug - a moth found in the Harvard Mark II computer in 1947.",
+  "Fun fact: The term 'debugging' came from removing an actual moth from a computer.",
+  "In binary code, a human would need 5.5 million years to count to a trillion.",
+  "The first programmer in history was a woman - Ada Lovelace.",
+  "JavaScript was created in just 10 days by Brendan Eich in 1995.",
+  "There are over 700 different programming languages!",
+];
 
 export const LoadingFact = () => {
-  const [funFact, setFunFact] = useState<string>("");
+  const [currentFact, setCurrentFact] = useState(facts[0]);
 
   useEffect(() => {
-    const funFacts = [
-      "The first computer virus was created in 1983.",
-      "The first 1GB hard drive was announced in 1980, which weighed over 500 pounds.",
-      "The first computer programmer was Ada Lovelace in the 1800s.",
-      "The first high-level programming language was Fortran, developed in the 1950s.",
-      "The first computer mouse was made of wood.",
-      "The term 'bug' in programming was coined after an actual bug (a moth) was found in a computer.",
-      "The first website ever created is still online.",
-      "The first email was sent by Ray Tomlinson to himself in 1971.",
-      "The first video game ever created was 'Tennis for Two' in 1958.",
-      "The first computer game was created in 1961 and was called 'Spacewar!'."
-    ];
+    const interval = setInterval(() => {
+      setCurrentFact(facts[Math.floor(Math.random() * facts.length)]);
+    }, 4000);
 
-    const randomFact = funFacts[Math.floor(Math.random() * funFacts.length)];
-    setFunFact(randomFact);
+    return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="text-gray-500 text-base">
-      I can use this section to also display the student's progress
-      Please wait while I prepare your answer. For now, here's a fun fact: {funFact}
+    <div className="space-y-4">
+      <p className="text-sm text-gray-600 animate-pulse">{currentFact}</p>
+      <div className="h-1 w-full bg-gray-200 rounded">
+        <div className="h-1 bg-blue-500 rounded animate-[loading_2s_ease-in-out_infinite]" />
+      </div>
     </div>
   );
 };

@@ -14,6 +14,7 @@ export const useHandleSubmit = (activeConversationId: string, userId: string) =>
   const { toast } = useToast();
   const { saveConversations } = useSaveConversations();
   const { setConversations } = useConversations();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     concept: '',
     problemDesc: '',
@@ -21,6 +22,7 @@ export const useHandleSubmit = (activeConversationId: string, userId: string) =>
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
       const response = await fetch(`http://localhost:${process.env.NEXT_PUBLIC_FASTAPI_PORT}/createSolution`, {
@@ -67,6 +69,8 @@ export const useHandleSubmit = (activeConversationId: string, userId: string) =>
         description: "Failed to submit the form",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -79,5 +83,6 @@ export const useHandleSubmit = (activeConversationId: string, userId: string) =>
     formData,
     handleSubmit,
     handleChange,
+    isLoading
   };
 };
