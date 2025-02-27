@@ -86,7 +86,7 @@ export const useConversations = () => {
     if (hasEmptyChat) {
       // Find the empty conversation and set it as active
       const emptyChat = conversations.find(conv => conv.messages.length === 0);
-      if (emptyChat) {
+      if (emptyChat && emptyChat.id) {
         setActiveConversationId(emptyChat.id);
       }
       return; // Don't create a new chat

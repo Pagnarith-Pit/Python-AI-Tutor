@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { ConversationList } from "./ConversationList";
@@ -18,6 +18,8 @@ import ProblemForm from "./NewProblemForm";
  */
 export const ChatInterface = () => {
   const { user, loading: authLoading } = useAuth();
+  // const [conversationLoaded, setConversationLoaded] = useState(false);
+
   const {
     conversations,
     activeConversationId,
@@ -35,11 +37,19 @@ export const ChatInterface = () => {
     handleStopGeneration
   } = useChat(setConversations, activeConversationId, conversations);
 
+  const [problemFormSubmitted, setProblemFormSubmitted] = useState(false);
+
   useEffect(() => {
     if (user) {
       fetchConversations();
+      // setConversationLoaded(true);
     }
   }, [user]);
+
+  // if (!conversationLoaded) {
+  //   console.log('loading conversations');
+  //   return
+  // }
 
   if (authLoading) {
     return (
@@ -53,9 +63,9 @@ export const ChatInterface = () => {
     return <LoginForm />;
   }
 
-  const activeConversation =
-    conversations.find((c) => c.id === activeConversationId) ||
-    conversations[0];
+  const activeConversation = conversations.find((c) => c.id === activeConversationId);
+  const hasMessages = activeConversation?.messages && activeConversation.messages.length > 0;
+
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -70,7 +80,20 @@ export const ChatInterface = () => {
       />
 
       <div className="flex-1 overflow-hidden flex flex-col">
-        {activeConversation?.messages?.length > 0 ? (
+        {!hasMessages ? (
+          <div className="flex-1 overflow-y-auto">
+            <div className="h-full flex bg-background items-center justify-center">
+              <div className="text-center mt-[10%]">
+                <ProblemForm 
+                  user={user} 
+                  activeConversationId={activeConversationId}
+                  setIsSubmitted={setProblemFormSubmitted}
+                  setConversations = {setConversations}
+                />
+              </div>
+            </div>
+          </div>
+        ) : (
           <>
             <MessageList 
               messages={activeConversation.messages} 
@@ -83,17 +106,6 @@ export const ChatInterface = () => {
               isGenerating={isStreaming}
             />
           </>
-        ) : (
-          <div className="flex-1 overflow-y-auto">
-            <div className="h-full flex bg-background items-center justify-center">
-              <div className="text-center mt-[10%]">
-                <ProblemForm 
-                  user={user} 
-                  activeConversationId={activeConversationId}
-                />
-              </div>
-            </div>
-          </div>
         )}
       </div>
     </div>

@@ -1,8 +1,5 @@
 import { useEffect, useRef } from "react";
 import { Message } from "./Message";
-import { LoadingMessage } from "./LoadingMessage";
-import { LoadingDots } from "./LoadingDots";
-import ProblemForm from "./NewProblemForm";
 
 interface MessageType {
   role: "user" | "assistant";
@@ -24,6 +21,7 @@ interface MessageListProps {
 export const MessageList = ({ messages, isLoading }: MessageListProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
@@ -32,10 +30,10 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
     <div className="flex-1 overflow-y-auto">
       {messages.length === 0 ? (
         <div className="h-full flex bg-background items-center justify-center">
-        <div className="text-center mt-[10%]">
-          <p>Placeholder</p>
+          <div className="text-center mt-[10%]">
+            <p>Placeholder</p>
+          </div>
         </div>
-      </div>
       ) : (
         <>
           {messages.map((message, index) => (
@@ -44,6 +42,7 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
                 {...message} 
                 isLoading={isLoading && index === messages.length - 1 && message.role === "assistant"}
                 isLastMessage={!isLoading && index === messages.length - 1 && message.role === "assistant"}
+                isFirstMessage={index === 0 && message.role === "user"}
               />
             </div>
           ))}

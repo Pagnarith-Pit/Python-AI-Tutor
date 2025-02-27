@@ -59,9 +59,14 @@ async def generate_solution(client, message: ChatMessage):
 @app.post("/createSolution")
 async def create_Solution(message: ChatMessage):
     AI_response = await generate_solution(client, message)
-    AI_response = AI_response.content.split("</think>")
-    AI_think = AI_response[0]
-    AI_answer = AI_response[1]
+    ## Uncomment to switch to the thinking model
+    # AI_response = AI_response.content.split("</think>")
+    # AI_think = AI_response[0]
+    # AI_answer = AI_response[1]
+    
+    ## ONLY A TEST
+    AI_answer = AI_response.content
+    AI_think = "This is the thinking model"
     
     print(AI_response)
     return {"model_reasoning": AI_think, "response": AI_answer}
@@ -149,9 +154,10 @@ async def chat(request: Request, message: ChatMessage, correct_answer: str = "",
     message = message.message['messages']
 
     ## Must work on the prompt to make it more specific
-    # ------------------------------------------------
-    input = [{"role": "user", "content": PROMPT + " " + message}]
-    # ------------------------------------------------
+    ## ------------------------------------------------
+    # input = [{"role": "user", "content": PROMPT + " " + message}]
+    input = message
+    ## ------------------------------------------------
 
     generator = generate_chat(client, input, request)
 

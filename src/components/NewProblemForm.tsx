@@ -7,6 +7,8 @@ import { LoadingMessage } from './LoadingMessage';
 interface NewProblemFormProps {
     user: { id: string };
     activeConversationId: string;
+    setIsSubmitted: (isSubmitted: boolean) => void;
+    setConversations: (updater: (prevConversations: any[]) => any[]) => void;
 }
 
 /**
@@ -16,15 +18,15 @@ interface NewProblemFormProps {
  * - Children: LoginForm (when user is not logged in)
  * - Calls: useHandleSubmit
  */
-const ProblemForm = ({ user, activeConversationId }: NewProblemFormProps) => {
+
+const ProblemForm = ({ user, activeConversationId, setIsSubmitted, setConversations }: NewProblemFormProps) => {
     if (!user) {
         return <LoginForm />;
     }
 
-    const { formData, handleSubmit, handleChange, isLoading } = useHandleSubmit(activeConversationId, user.id);
+    const { formData, handleSubmit, handleChange, isLoading } = useHandleSubmit(activeConversationId, user.id, setIsSubmitted, setConversations);
 
     if (isLoading) {
-      console.log("Loading...");
       return (
         <div className="min-h-screen bg-background flex items-center justify-center">
           <div className="max-w-2xl mx-auto px-4 w-full">
@@ -98,3 +100,4 @@ const ProblemForm = ({ user, activeConversationId }: NewProblemFormProps) => {
 };
 
 export default ProblemForm;
+

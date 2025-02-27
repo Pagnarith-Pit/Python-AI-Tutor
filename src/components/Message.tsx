@@ -11,7 +11,8 @@ interface MessageProps {
   role: "user" | "assistant";
   isLoading?: boolean;
   isLastMessage?: boolean;
-  isGenerating?: boolean; // added isGenerating prop
+  isGenerating?: boolean;
+  isFirstMessage?: boolean; // New prop to identify the first message
 }
 
 /**
@@ -55,8 +56,60 @@ const customStyle = {
   },
 };
 
-export const Message = ({ content, role, isLoading, isLastMessage, isGenerating }: MessageProps) => {
+export const Message = ({ content, role, isLoading, isLastMessage, isGenerating, isFirstMessage }: MessageProps) => {
   const isUser = role === "user";
+
+  // Parse the content if it's the first message to extract concept and problem description
+  const renderFirstMessage = () => {
+    try {
+      const data = JSON.parse(content);
+      return (
+        <div className="space-y-6 bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-xl shadow-sm">
+          <div>
+            <h2 className="text-xl font-semibold text-purple-900 mb-3">
+              🎯 Key Concepts To Apply
+            </h2>
+            <p className="text-lg text-purple-800">{data.concept}</p>
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-purple-900 mb-3">
+              📝 Problem Description
+            </h2>
+            <p className="text-lg text-purple-800 whitespace-pre-wrap">{data.problemDesc}</p>
+          </div>
+        </div>
+      );
+    } catch (e) {
+      // Fallback to regular message display if parsing fails
+      return (
+        <div className="prose prose-sm max-w-none">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              code: ({ node, className, children, ...props }) => {
+                const match = /language-(\w+)/.exec(className || '');
+                return match ? (
+                  <SyntaxHighlighter
+                    style={customStyle as any}
+                    language={match[1]}
+                    PreTag="div"
+                  >
+                    {String(children).replace(/\n$/, '')}
+                  </SyntaxHighlighter>
+                ) : (
+                  <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+                    {children}
+                  </code>
+                );
+              },
+            }}
+          >
+            {content}
+          </ReactMarkdown>
+        </div>
+      );
+    }
+  };
 
   return (
     <div className={cn("px-4 py-6 sm:px-6 lg:px-8 bg-white")}>
@@ -81,55 +134,61 @@ export const Message = ({ content, role, isLoading, isLastMessage, isGenerating 
               </div>
             </>
           ) : (
-            <div className="prose prose-sm max-w-none">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  code: ({ node, className, children, ...props }) => {
-                    const match = /language-(\w+)/.exec(className || '');
-                    const language = match ? match[1] : '';
-                    
-                    if (!match) {
-                      return (
-                        <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
-                          {children}
-                        </code>
-                      );
-                    }
+            <>
+              {isFirstMessage ? (
+                renderFirstMessage()
+              ) : (
+                <div className="prose prose-sm max-w-none">
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      code: ({ node, className, children, ...props }) => {
+                        const match = /language-(\w+)/.exec(className || '');
+                        const language = match ? match[1] : '';
+                        
+                        if (!match) {
+                          return (
+                            <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+                              {children}
+                            </code>
+                          );
+                        }
 
-                    return (
-                      <SyntaxHighlighter
-                        style={customStyle as any}
-                        language={language}
-                        PreTag="div"
-                        customStyle={{
-                          margin: '1.5rem 0',
-                          borderRadius: '0.5rem',
-                          background: '#f5f5f5',
-                        }}
-                      >
-                        {String(children).replace(/\n$/, '')}
-                      </SyntaxHighlighter>
-                    );
-                  },
-                  h1: ({ node, ...props }) => <h1 className="text-2xl font-semibold mt-8 mb-4" {...props} />,
-                  h2: ({ node, ...props }) => <h2 className="text-xl font-semibold mt-6 mb-3" {...props} />,
-                  h3: ({ node, ...props }) => <h3 className="text-lg font-semibold mt-5 mb-2" {...props} />,
-                  p: ({ node, ...props }) => <p className="text-gray-700 leading-7 mb-4" {...props} />,
-                  ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4 space-y-2" {...props} />,
-                  ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 space-y-2" {...props} />,
-                  li: ({ node, ...props }) => <li className="mb-1" {...props} />,
-                  hr: ({ node, ...props }) => <hr className="my-8 border-t-2 border-gray-200" {...props} />,
-                }}
-              >
-                {content}
-              </ReactMarkdown>
+                        return (
+                          <SyntaxHighlighter
+                            style={customStyle as any}
+                            language={language}
+                            PreTag="div"
+                            customStyle={{
+                              margin: '1.5rem 0',
+                              borderRadius: '0.5rem',
+                              background: '#f5f5f5',
+                            }}
+                          >
+                            {String(children).replace(/\n$/, '')}
+                          </SyntaxHighlighter>
+                        );
+                      },
+                      h1: ({ node, ...props }) => <h1 className="text-2xl font-semibold mt-8 mb-4" {...props} />,
+                      h2: ({ node, ...props }) => <h2 className="text-xl font-semibold mt-6 mb-3" {...props} />,
+                      h3: ({ node, ...props }) => <h3 className="text-lg font-semibold mt-5 mb-2" {...props} />,
+                      p: ({ node, ...props }) => <p className="text-gray-700 leading-7 mb-4" {...props} />,
+                      ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4 space-y-2" {...props} />,
+                      ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 space-y-2" {...props} />,
+                      li: ({ node, ...props }) => <li className="mb-1" {...props} />,
+                      hr: ({ node, ...props }) => <hr className="my-8 border-t-2 border-gray-200" {...props} />,
+                    }}
+                  >
+                    {content}
+                  </ReactMarkdown>
+              </div>
+              )}
               {role === "assistant" && isLastMessage && !isGenerating && (
                 <div className="mt-4">
                   <LoadingMessage />
                 </div>
               )}
-            </div>
+            </>
           )}
         </div>
       </div>
