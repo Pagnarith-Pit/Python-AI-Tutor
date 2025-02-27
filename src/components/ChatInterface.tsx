@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
@@ -10,16 +11,8 @@ import { useChat } from "@/hooks/useChat";
 import ProblemForm from "./NewProblemForm";
 import { useHandleSubmit } from "@/hooks/useHandleSubmit";
 
-/**
- * ChatInterface component:
- * - Main component that orchestrates the chat interface.
- * - Parent: None (root component)
- * - Children: UserMenu, ConversationList, MessageList, MessageInput, LoginForm, ProblemForm
- * - Calls: useAuth, useConversations, useChat
- */
 export const ChatInterface = () => {
   const { user, loading: authLoading } = useAuth();
-  // const [conversationLoaded, setConversationLoaded] = useState(false);
 
   const {
     conversations,
@@ -43,10 +36,8 @@ export const ChatInterface = () => {
   useEffect(() => {
     if (user) {
       fetchConversations();
-      // setConversationLoaded(true);
     }
   }, [user]);
-
 
   if (authLoading) {
     return (
@@ -60,13 +51,12 @@ export const ChatInterface = () => {
     return <LoginForm />;
   }
 
-  const { formData, handleSubmit, handleChange, isLoading } = useHandleSubmit(activeConversationId, user?.id, setProblemFormSubmitted, setConversations);
-
-
-  // if (!conversationLoaded) {
-  //   console.log('loading conversations');
-  //   return
-  // }
+  const { formData, handleSubmit, handleChange, isLoading } = useHandleSubmit(
+    activeConversationId,
+    user?.id,
+    setProblemFormSubmitted,
+    setConversations
+  );
 
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
   const hasMessages = activeConversation?.messages && activeConversation.messages.length > 0;
@@ -107,14 +97,13 @@ export const ChatInterface = () => {
               messages={activeConversation.messages} 
               isLoadingChat={isLoadingChat} 
               isLoadingSolution={isLoading}
-              // activeConversationId={activeConversationId}
-              // conversationID={conversations.id}
             />
             <MessageInput 
               onSend={handleSendMessage} 
               onStop={handleStopGeneration}
               disabled={isLoadingChat} 
               isGenerating={isStreaming}
+              conversationId={activeConversationId}
             />
           </>
         )}

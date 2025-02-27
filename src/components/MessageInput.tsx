@@ -1,29 +1,33 @@
+
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { SendIcon, StopCircle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { useMessageDraft } from "@/hooks/useMessageDraft";
 
 interface MessageInputProps {
   onSend: (message: string) => void;
   onStop: () => void;
   disabled?: boolean;
   isGenerating?: boolean;
+  conversationId: string; // Add this prop
 }
 
-/**
- * @description MessageInput component provides a textarea for typing messages and buttons for sending or stopping message generation.
- * @parent ChatInterface
- * @output A form with a textarea and send/stop buttons.
- */
-export const MessageInput = ({ onSend, onStop, disabled, isGenerating }: MessageInputProps) => {
-  const [message, setMessage] = useState("");
+export const MessageInput = ({ 
+  onSend, 
+  onStop, 
+  disabled, 
+  isGenerating,
+  conversationId 
+}: MessageInputProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { messageDraft, updateMessageDraft } = useMessageDraft(conversationId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim() && !disabled) {
-      onSend(message);
-      setMessage("");
+    if (messageDraft.trim() && !disabled) {
+      onSend(messageDraft);
+      updateMessageDraft('');
     }
   };
 
@@ -42,15 +46,15 @@ export const MessageInput = ({ onSend, onStop, disabled, isGenerating }: Message
         200
       )}px`;
     }
-  }, [message]);
+  }, [messageDraft]);
 
   return (
     <form onSubmit={handleSubmit} className="p-4 bg-white border-t">
       <div className="mx-auto max-w-3xl flex gap-4">
         <Textarea
           ref={textareaRef}
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          value={messageDraft}
+          onChange={(e) => updateMessageDraft(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type a message..."
           className="min-h-[60px] resize-none"
@@ -69,7 +73,7 @@ export const MessageInput = ({ onSend, onStop, disabled, isGenerating }: Message
           <Button
             type="submit"
             size="icon"
-            disabled={!message.trim() || disabled}
+            disabled={!messageDraft.trim() || disabled}
             className="h-[60px] w-[60px] bg-purple-600 hover:bg-purple-700"
           >
             <SendIcon className="h-5 w-5" />
