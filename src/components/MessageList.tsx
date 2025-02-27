@@ -40,7 +40,7 @@ export const MessageList = ({ messages, isLoading }: MessageListProps) => {
             <div key={index}>
               <Message 
                 {...message} 
-                isLoading={isLoading && index === messages.length - 1 && message.role === "assistant"}
+                isLoading={isLoading} //&& index === messages.length - 1 && message.role === "assistant"}
                 isLastMessage={!isLoading && index === messages.length - 1 && message.role === "assistant"}
                 isFirstMessage={index === 0 && message.role === "user"}
               />

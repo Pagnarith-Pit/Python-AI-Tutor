@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import { tomorrow } from "react-syntax-highlighter/dist/cjs/styles/hljs";
 import { LoadingMessage } from "./LoadingMessage";
+import { ProgressBuddy } from "./ProgressBuddy";
 
 interface MessageProps {
   content: string;
@@ -185,7 +186,7 @@ export const Message = ({ content, role, isLoading, isLastMessage, isGenerating,
               )}
               {role === "assistant" && isLastMessage && !isGenerating && (
                 <div className="mt-4">
-                  <LoadingMessage />
+                  <ProgressBuddy />
                 </div>
               )}
             </>
