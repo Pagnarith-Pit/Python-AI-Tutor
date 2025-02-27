@@ -1,3 +1,4 @@
+
 import { useEffect, useRef } from "react";
 import { Message } from "./Message";
 
@@ -30,7 +31,7 @@ export const MessageList = ({ messages, isLoadingChat, isLoadingSolution }: Mess
     <div className="flex-1 overflow-y-auto">
       {messages.length === 0 ? (
         <div className="h-full flex bg-background items-center justify-left">
-          <div className="text-center mt-[10%]">
+          <div className="text-left mt-[10%] px-8">
             <p>Placeholder</p>
           </div>
         </div>

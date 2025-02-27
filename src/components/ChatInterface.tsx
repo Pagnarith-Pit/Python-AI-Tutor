@@ -13,6 +13,7 @@ import { useHandleSubmit } from "@/hooks/useHandleSubmit";
 
 export const ChatInterface = () => {
   const { user, loading: authLoading } = useAuth();
+  const [activeChat, setActiveChat] = useState<string | null>(null);
 
   const {
     conversations,
@@ -38,6 +39,11 @@ export const ChatInterface = () => {
       fetchConversations();
     }
   }, [user]);
+
+  const handleSend = (message: string) => {
+    setActiveChat(activeConversationId);
+    handleSendMessage(message);
+  };
 
   if (authLoading) {
     return (
@@ -76,8 +82,8 @@ export const ChatInterface = () => {
       <div className="flex-1 overflow-hidden flex flex-col">
         {!hasMessages ? (
           <div className="flex-1 overflow-y-auto">
-            <div className="h-full flex bg-background items-center justify-center">
-              <div className="text-center mt-[10%]">
+            <div className="h-full flex bg-background items-center justify-left">
+              <div className="text-left mt-[10%] px-8 w-full max-w-3xl mx-auto">
                 <ProblemForm 
                   user={user} 
                   activeConversationId={activeConversationId}
@@ -95,11 +101,11 @@ export const ChatInterface = () => {
           <>
             <MessageList 
               messages={activeConversation.messages} 
-              isLoadingChat={isLoadingChat} 
+              isLoadingChat={isLoadingChat && activeChat === activeConversationId} 
               isLoadingSolution={isLoading}
             />
             <MessageInput 
-              onSend={handleSendMessage} 
+              onSend={handleSend} 
               onStop={handleStopGeneration}
               disabled={isLoadingChat} 
               isGenerating={isStreaming}
