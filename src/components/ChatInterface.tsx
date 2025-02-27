@@ -13,7 +13,7 @@ import { useHandleSubmit } from "@/hooks/useHandleSubmit";
 
 export const ChatInterface = () => {
   const { user, loading: authLoading } = useAuth();
-  const [activeChat, setActiveChat] = useState<string | null>(null);
+  const [activeChat, setActiveChat] = useState<string>("");
 
   const {
     conversations,
@@ -57,12 +57,14 @@ export const ChatInterface = () => {
     return <LoginForm />;
   }
 
-  const { formData, handleSubmit, handleChange, isLoading } = useHandleSubmit(
+  const { formData, handleSubmit, handleChange, isLoading, isLoadingSolution } = useHandleSubmit(
     activeConversationId,
     user?.id,
     setProblemFormSubmitted,
     setConversations
   );
+
+  // isLoadingSolution never becomes false because this component never actually rerenders
 
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
   const hasMessages = activeConversation?.messages && activeConversation.messages.length > 0;
@@ -102,7 +104,7 @@ export const ChatInterface = () => {
             <MessageList 
               messages={activeConversation.messages} 
               isLoadingChat={isLoadingChat && activeChat === activeConversationId} 
-              isLoadingSolution={isLoading}
+              isLoadingSolution={isLoadingSolution && false && activeChat === activeConversationId}
             />
             <MessageInput 
               onSend={handleSend} 

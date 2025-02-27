@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import supabase from "@/lib/supabase";
 import { useSaveConversations } from "@/hooks/useConversations";
@@ -20,6 +20,7 @@ export const useHandleSubmit = (
   const { toast } = useToast();
   const { saveConversations } = useSaveConversations();
   const [isLoading, setIsLoading] = useState(false);
+  const isLoadingSolution = useRef(false);
   const [formData, setFormData] = useState({
     concept: '',
     problemDesc: '',
@@ -48,7 +49,8 @@ export const useHandleSubmit = (
         });
       });
 
-      setIsLoading(true);
+      // setIsLoading(true);
+      isLoadingSolution.current = true;
 
       const response = await fetch(`http://localhost:${process.env.NEXT_PUBLIC_FASTAPI_PORT}/createSolution`, {
         method: 'POST',
@@ -108,7 +110,8 @@ export const useHandleSubmit = (
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      isLoadingSolution.current = false
+      // setIsLoading(false);
     }
   };
 
@@ -121,6 +124,7 @@ export const useHandleSubmit = (
     formData,
     handleSubmit,
     handleChange,
-    isLoading
+    isLoading,
+    isLoadingSolution
   };
-};
+}

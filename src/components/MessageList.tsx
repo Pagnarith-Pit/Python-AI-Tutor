@@ -25,7 +25,7 @@ export const MessageList = ({ messages, isLoadingChat, isLoadingSolution }: Mess
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoadingChat]);
+  }, [messages, isLoadingChat, isLoadingSolution]);
 
   return (
     <div className="flex-1 overflow-y-auto">
