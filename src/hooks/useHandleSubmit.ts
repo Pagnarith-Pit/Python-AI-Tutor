@@ -27,8 +27,6 @@ export const useHandleSubmit = (
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
 
     try {
       // Create initial message
@@ -49,6 +47,8 @@ export const useHandleSubmit = (
           return conv;
         });
       });
+
+      setIsLoading(true);
 
       const response = await fetch(`http://localhost:${process.env.NEXT_PUBLIC_FASTAPI_PORT}/createSolution`, {
         method: 'POST',
@@ -98,6 +98,7 @@ export const useHandleSubmit = (
 
       // Save to database
       await saveConversations(activeConversationId, userId, model_reasoning, model_answer);
+
 
     } catch (error) {
       console.error('Error:', error);

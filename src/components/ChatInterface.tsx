@@ -8,6 +8,7 @@ import { LoginForm } from "./LoginForm";
 import { useConversations } from "@/hooks/useConversations";
 import { useChat } from "@/hooks/useChat";
 import ProblemForm from "./NewProblemForm";
+import { useHandleSubmit } from "@/hooks/useHandleSubmit";
 
 /**
  * ChatInterface component:
@@ -31,7 +32,7 @@ export const ChatInterface = () => {
   } = useConversations();
 
   const {
-    isLoading,
+    isLoadingChat,
     isStreaming,
     handleSendMessage,
     handleStopGeneration
@@ -46,10 +47,6 @@ export const ChatInterface = () => {
     }
   }, [user]);
 
-  // if (!conversationLoaded) {
-  //   console.log('loading conversations');
-  //   return
-  // }
 
   if (authLoading) {
     return (
@@ -63,9 +60,16 @@ export const ChatInterface = () => {
     return <LoginForm />;
   }
 
+  const { formData, handleSubmit, handleChange, isLoading } = useHandleSubmit(activeConversationId, user?.id, setProblemFormSubmitted, setConversations);
+
+
+  // if (!conversationLoaded) {
+  //   console.log('loading conversations');
+  //   return
+  // }
+
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
   const hasMessages = activeConversation?.messages && activeConversation.messages.length > 0;
-
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -88,7 +92,11 @@ export const ChatInterface = () => {
                   user={user} 
                   activeConversationId={activeConversationId}
                   setIsSubmitted={setProblemFormSubmitted}
-                  setConversations = {setConversations}
+                  setConversations={setConversations}
+                  formData={formData}
+                  handleSubmit={handleSubmit}
+                  handleChange={handleChange}
+                  isLoading={isLoading}
                 />
               </div>
             </div>
@@ -97,12 +105,15 @@ export const ChatInterface = () => {
           <>
             <MessageList 
               messages={activeConversation.messages} 
-              isLoading={isLoading} 
+              isLoadingChat={isLoadingChat} 
+              isLoadingSolution={isLoading}
+              // activeConversationId={activeConversationId}
+              // conversationID={conversations.id}
             />
             <MessageInput 
               onSend={handleSendMessage} 
               onStop={handleStopGeneration}
-              disabled={isLoading} 
+              disabled={isLoadingChat} 
               isGenerating={isStreaming}
             />
           </>

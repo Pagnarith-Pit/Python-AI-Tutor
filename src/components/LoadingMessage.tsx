@@ -31,7 +31,7 @@ export const LoadingMessage = () => {
           </div>
           <div className="flex-1 space-y-3">
             <div className="text-sm font-medium text-gray-800 flex justify-between items-center">
-              <span>Progress Buddy</span>
+              <span>Please Wait While I Prepare Your Solution-Steps</span>
               <Button
                 variant="ghost"
                 size="sm"

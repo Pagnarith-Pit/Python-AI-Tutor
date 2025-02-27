@@ -22,7 +22,7 @@ export const useChat = (
   activeConversationId: string,
   conversations: any[]
 ) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const { toast } = useToast();
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -62,7 +62,7 @@ export const useChat = (
       )
     );
 
-    setIsLoading(true);
+    setIsLoadingChat(true);
     setIsStreaming(true);
 
     try {
@@ -92,7 +92,7 @@ export const useChat = (
       const decoder = new TextDecoder();
       accumulatedContentRef.current = "";
 
-      setIsLoading(false);
+      setIsLoadingChat(false);
 
       while (true) {
         const { done, value } = await reader.read();
@@ -146,14 +146,14 @@ export const useChat = (
         }
       }
     } finally {
-      setIsLoading(false);
+      setIsLoadingChat(false);
       setIsStreaming(false);
       abortControllerRef.current = null;
     }
   };
 
   return {
-    isLoading,
+    isLoadingChat,
     isStreaming,
     handleSendMessage,
     handleStopGeneration

@@ -10,7 +10,7 @@ import { ProgressBuddy } from "./ProgressBuddy";
 interface MessageProps {
   content: string;
   role: "user" | "assistant";
-  isLoading?: boolean;
+  isLoadingSolution?: boolean;
   isLastMessage?: boolean;
   isGenerating?: boolean;
   isFirstMessage?: boolean; // New prop to identify the first message
@@ -57,7 +57,7 @@ const customStyle = {
   },
 };
 
-export const Message = ({ content, role, isLoading, isLastMessage, isGenerating, isFirstMessage }: MessageProps) => {
+export const Message = ({ content, role, isLoadingSolution, isLastMessage, isGenerating, isFirstMessage }: MessageProps) => {
   const isUser = role === "user";
 
   // Parse the content if it's the first message to extract concept and problem description
@@ -127,12 +127,13 @@ export const Message = ({ content, role, isLoading, isLastMessage, isGenerating,
           <div className="text-sm font-medium text-gray-800">
             {isUser ? "You" : "Helper Buddy"}
           </div>
-          {isLoading ? (
+          {isLoadingSolution ? (
             <>
-              <LoadingDots className="pt-2" />
+              {renderFirstMessage()}
               <div className="mt-4">
                 <LoadingMessage />
               </div>
+              <LoadingDots className="pt-2" />
             </>
           ) : (
             <>

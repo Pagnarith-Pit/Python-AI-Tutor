@@ -13,16 +13,21 @@ export const useSaveConversationList = (conversations: any[], userId: string) =>
   const saveConversations = async () => {
     if (!userId) return;
 
+    // santiize the conversations to maintain the created_at date
+    const sanitizedConversations = conversations.map(({ created_at, ...rest }) => ({
+      ...rest,
+      user_id: userId,
+      updated_at: new Date().toISOString()
+    }));
+    
+    const { error } = await supabase
+      .from('conversations')
+      .upsert(sanitizedConversations);
+
     try {
       const { error } = await supabase
         .from('conversations')
-        .upsert(
-          conversations.map(conv => ({
-            ...conv,
-            user_id: userId,
-            updated_at: new Date().toISOString()
-          }))
-        );
+        .upsert(sanitizedConversations);
 
       if (error) throw error;
     } catch (error) {

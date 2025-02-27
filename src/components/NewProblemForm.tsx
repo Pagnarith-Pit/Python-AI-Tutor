@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
-import { Send} from 'lucide-react';
+import { Send } from 'lucide-react';
 import { LoginForm } from './LoginForm';
-import { useHandleSubmit } from "@/hooks/useHandleSubmit";
 import { LoadingMessage } from './LoadingMessage';
 
 interface NewProblemFormProps {
@@ -9,6 +8,10 @@ interface NewProblemFormProps {
     activeConversationId: string;
     setIsSubmitted: (isSubmitted: boolean) => void;
     setConversations: (updater: (prevConversations: any[]) => any[]) => void;
+    formData: { concept: string; problemDesc: string };
+    handleSubmit: (e: React.FormEvent) => void;
+    handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    isLoading: boolean;
 }
 
 /**
@@ -19,21 +22,9 @@ interface NewProblemFormProps {
  * - Calls: useHandleSubmit
  */
 
-const ProblemForm = ({ user, activeConversationId, setIsSubmitted, setConversations }: NewProblemFormProps) => {
+const ProblemForm = ({ user, formData, handleSubmit, handleChange}: NewProblemFormProps) => {
     if (!user) {
         return <LoginForm />;
-    }
-
-    const { formData, handleSubmit, handleChange, isLoading } = useHandleSubmit(activeConversationId, user.id, setIsSubmitted, setConversations);
-
-    if (isLoading) {
-      return (
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="max-w-2xl mx-auto px-4 w-full">
-            <LoadingMessage />
-          </div>
-        </div>
-      );
     }
 
   return (
