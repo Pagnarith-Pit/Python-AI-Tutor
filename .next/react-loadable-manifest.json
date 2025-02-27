@@ -1904,5 +1904,11 @@
   "../node_modules/react-syntax-highlighter/dist/esm/prism-async.js -> refractor": {
     "id": "../node_modules/react-syntax-highlighter/dist/esm/prism-async.js -> refractor",
     "files": []
+  },
+  "pages/chat.tsx -> @/components/ChatInterface": {
+    "id": "pages/chat.tsx -> @/components/ChatInterface",
+    "files": [
+      "static/chunks/src_components_ChatInterface_tsx.js"
+    ]
   }
 }

@@ -4,6 +4,10 @@ as reverse proxy to
 3) The AI tutor should also be a container, such that when it fails, it spins back up
 ##########################
 
+EASY TASK
+1) Move conversation to the left
+2) Only show loading on active conversation
+
 
 
 ##### COMPLETED ########

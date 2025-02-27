@@ -40,7 +40,7 @@ export const MessageList = ({ messages, isLoadingChat, isLoadingSolution }: Mess
             <div key={index}>
               <Message 
                 {...message} 
-                isLoadingSolution={isLoadingSolution} // Pass isLoadingSolution to Message
+                isLoadingSolution={isLoadingSolution && index === messages.length - 1} // Pass isLoadingSolution to Message
                 isLastMessage={!isLoadingChat && index === messages.length - 1 && message.role === "assistant"}
                 isFirstMessage={index === 0 && message.role === "user"}
               />
