@@ -215,6 +215,10 @@ export const useChat = (
     // Check student's progress
     let currentProgress = currentConversation.progress;
     const currentCorrectAnswer = currentConversation.model_solution[currentConversation.model_solution.length - currentProgress];
+
+    console.log(currentConversation.model_solution);
+    console.log("Current Correct Answer in UseChat:", currentCorrectAnswer);
+
     const data = await checkStudentProgress(updatedConversation, currentCorrectAnswer);
     
     // Check if student's answer is correct
@@ -255,7 +259,10 @@ export const useChat = (
       const signal = abortControllerRef.current.signal;
       
       const requestBody = JSON.stringify({
-        message: updatedConversation
+        message: updatedConversation,
+        correct_answer: currentCorrectAnswer,
+        strategy: data.strategy,
+        student_mistake: data.student_mistake
       });
 
       await fetchAIResponse(requestBody, signal, conversationId);

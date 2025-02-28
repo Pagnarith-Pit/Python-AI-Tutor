@@ -26,6 +26,12 @@ app.add_middleware(
 
 class ChatMessage(BaseModel):
     message: dict
+    student_mistake: str
+    strategy: str
+    correct_answer: str
+
+class FormMessage(BaseModel):
+    message: dict
 
 class checkResponse(BaseModel):
     message: dict
@@ -42,7 +48,7 @@ def createClient(api_key):
 client = createClient(API_KEY)
 
 # Creating Solution from Thinking Model
-async def generate_solution(client, message: ChatMessage):
+async def generate_solution(client, message: FormMessage):
     # Processing Message4
     input_concept = message.message['messages']['concept']
     input_problemDesc = message.message['messages']['problemDesc']
@@ -61,7 +67,7 @@ async def generate_solution(client, message: ChatMessage):
     return(completion.choices[0].message)
 
 @app.post("/createSolution")
-async def create_Solution(message: ChatMessage):
+async def create_Solution(message: FormMessage):
     # AI_response = await generate_solution(client, message)
     ## Uncomment to switch to the thinking model
     # AI_response = AI_response.content.split("</think>")
@@ -159,9 +165,8 @@ async def generate_chat(client, input, request: Request):
 
 ## Arguments for message: messages, correct_answer, student_mistake, strategy
 @app.post("/chat")
-async def chat(request: Request, message: ChatMessage):
+async def chat(request: ChatMessage):
     ## Prompt the AI to create the question with those inputs
-
         
     PROMPT = "Create a question based on the following information: " + message.correct_answer + " and focus on the following concepts: " + message.strategy + " and the student's mistake is: " + message.student_mistake
     message = message.message['messages']
@@ -169,13 +174,61 @@ async def chat(request: Request, message: ChatMessage):
     ## Must work on the prompt to make it more specific
     ## ------------------------------------------------
     # input = [{"role": "user", "content": PROMPT + " " + message}]
-    input = message
+    input = message + PROMPT
     ## ------------------------------------------------
 
-    generator = generate_chat(client, input, request)
+    ##generator = generate_chat(client, input, request)
+    generator = generate_test_input(input, request)
 
     return EventSourceResponse(
         generator,
         media_type="text/event-stream",
         ping=20000  # Send a ping every 20 seconds to keep the connection alive
     )
+
+async def generate_test_input(input_data, request: Request):
+    """Test generator that simply returns the input received"""
+    loop = asyncio.get_running_loop()
+    queue = asyncio.Queue()
+    is_disconnected = False
+
+    def worker():
+        try:
+            # Convert input to string for testing
+            input_str = f"Received input: {str(input_data)}"
+            
+            # Split into chunks for streaming simulation
+            chunks = [input_str[i:i+10] for i in range(0, len(input_str), 10)]
+            for chunk in chunks:
+                if is_disconnected:
+                    break
+                asyncio.run_coroutine_threadsafe(queue.put(chunk), loop)
+                time.sleep(0.1)  # Simulate streaming delay
+                
+        except Exception as e:
+            asyncio.run_coroutine_threadsafe(queue.put(f"Error: {str(e)}"), loop)
+        finally:
+            asyncio.run_coroutine_threadsafe(queue.put(None), loop)
+
+    thread = threading.Thread(target=worker, daemon=True)
+    thread.start()
+
+    try:
+        while True:
+            if await request.is_disconnected():
+                is_disconnected = True
+                break
+
+            token = await queue.get()
+            if token is None:
+                break
+            
+            yield token
+
+    except asyncio.CancelledError:
+        print("Stream was cancelled by the client")
+        is_disconnected = True
+        raise
+    finally:
+        if thread.is_alive():
+            print("Cleaning up worker thread")
