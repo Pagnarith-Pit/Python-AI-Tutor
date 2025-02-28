@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { formatContent } from "@/components/Message";
@@ -173,6 +174,26 @@ export const useChat = (
     await handleStreamingResponse(reader, conversationId);
   };
 
+  // Function to add congratulatory message when student completes all tasks
+  const addCongratulationsMessage = (conversationId: string) => {
+    const congratsMessage: Message = { 
+      role: "assistant", 
+      content: "Congratulation. You've Done Very Well" 
+    };
+
+    setConversations((prevConversations) =>
+      prevConversations.map((conv) =>
+        conv.id === conversationId
+          ? { 
+              ...conv, 
+              messages: [...conv.messages, congratsMessage],
+              isCompleted: true // Mark conversation as completed
+            }
+          : conv
+      )
+    );
+  };
+
   // Main function to handle sending a message
   const handleSendMessage = async (content: string) => {
     const conversationId = activeConversationId;
@@ -185,6 +206,16 @@ export const useChat = (
     
     const { currentConversation, updatedConversation } = conversationData;
 
+    // If conversation is already completed, don't allow more messages
+    if (currentConversation.isCompleted) {
+      toast({
+        title: "Chat Completed",
+        description: "This learning session has been completed. Please start a new chat for more practice.",
+        variant: "default",
+      });
+      return;
+    }
+
     // Update conversations state
     updateConversationsWithMessages(conversationId, userMessage, assistantMessage);
 
@@ -195,27 +226,31 @@ export const useChat = (
     // Check student's progress
     let currentProgress = currentConversation.progress;
     const currentCorrectAnswer = currentConversation.model_solution[currentConversation.model_solution.length - currentProgress];
-    const [student_mistake, strategy] = await checkStudentProgress(updatedConversation, currentCorrectAnswer);
-
-    // Check student's progress
-    if (student_mistake === "CORRECT") {
-      // Update the local reference
+    const data = await checkStudentProgress(updatedConversation, currentCorrectAnswer);
+    
+    // Check if student's answer is correct
+    if (data && data.student_mistake === "CORRECT") {
+      // Update the progress by decrementing it
       currentProgress = currentProgress - 1;
       
       // Update the actual state with the new progress value
       setConversations((prevConversations) =>
         prevConversations.map((conv) =>
           conv.id === conversationId
-            ? { ...conv, progress: currentProgress - 1 }
+            ? { ...conv, progress: currentProgress }
             : conv
         )
       );
     }
     
-    // End Chat if student is done
+    // End Chat if student is done (progress = 0)
     if (currentProgress === 0) {
       setIsLoadingChat(false);
       setIsStreaming(false);
+      
+      // Add congratulatory message
+      addCongratulationsMessage(conversationId);
+      
       return;
     }
 

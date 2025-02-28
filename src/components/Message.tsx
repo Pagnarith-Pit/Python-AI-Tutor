@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils";
 import { LoadingDots } from "./LoadingDots";
 import ReactMarkdown from "react-markdown";
@@ -57,8 +58,14 @@ const customStyle = {
   },
 };
 
+// Check if the message is a congratulation message
+const isCongratulationMessage = (content: string): boolean => {
+  return content.includes("Congratulation. You've Done Very Well");
+};
+
 export const Message = ({ content, role, isLoadingSolution, isLastMessage, isGenerating, isFirstMessage }: MessageProps) => {
   const isUser = role === "user";
+  const isCongratsMessage = !isUser && isCongratulationMessage(content);
 
   // Parse the content if it's the first message to extract concept and problem description
   const renderFirstMessage = () => {
@@ -112,6 +119,29 @@ export const Message = ({ content, role, isLoadingSolution, isLastMessage, isGen
     }
   };
 
+  // Render congratulation message with trophy
+  const renderCongratulationMessage = () => {
+    return (
+      <div className="space-y-6">
+        <div className="bg-gradient-to-r from-purple-100 to-green-100 p-6 rounded-xl shadow-md">
+          <h2 className="text-2xl font-bold text-purple-800 mb-2">
+            {content} 🎉
+          </h2>
+          <p className="text-gray-700 mb-4">
+            You have successfully completed all the challenges. Great job!
+          </p>
+          <div className="flex justify-center mt-4">
+            <div className="w-40 h-40 bg-gradient-to-b from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
+              <div className="w-32 h-32 bg-yellow-400 rounded-full flex items-center justify-center border-4 border-yellow-200">
+                <span className="text-5xl">🏆</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className={cn("px-4 py-6 sm:px-6 lg:px-8 bg-white")}>
       <div className="mx-auto max-w-3xl flex gap-4">
@@ -139,6 +169,8 @@ export const Message = ({ content, role, isLoadingSolution, isLastMessage, isGen
             <>
               {isFirstMessage ? (
                 renderFirstMessage()
+              ) : isCongratsMessage ? (
+                renderCongratulationMessage()
               ) : (
                 <div className="prose prose-sm max-w-none">
                   <ReactMarkdown
@@ -185,7 +217,7 @@ export const Message = ({ content, role, isLoadingSolution, isLastMessage, isGen
                   </ReactMarkdown>
               </div>
               )}
-              {role === "assistant" && isLastMessage && !isGenerating && (
+              {role === "assistant" && isLastMessage && !isGenerating && !isCongratsMessage && (
                 <div className="mt-4">
                   <ProgressBuddy />
                 </div>

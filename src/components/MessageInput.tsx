@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { SendIcon, StopCircle } from "lucide-react";
+import { SendIcon, StopCircle, LockIcon } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useMessageDraft } from "@/hooks/useMessageDraft";
 
@@ -10,7 +10,8 @@ interface MessageInputProps {
   onStop: () => void;
   disabled?: boolean;
   isGenerating?: boolean;
-  conversationId: string; // Add this prop
+  conversationId: string;
+  isCompleted?: boolean;
 }
 
 export const MessageInput = ({ 
@@ -18,14 +19,15 @@ export const MessageInput = ({
   onStop, 
   disabled, 
   isGenerating,
-  conversationId 
+  conversationId,
+  isCompleted = false
 }: MessageInputProps) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { messageDraft, updateMessageDraft } = useMessageDraft(conversationId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (messageDraft.trim() && !disabled) {
+    if (messageDraft.trim() && !disabled && !isCompleted) {
       onSend(messageDraft);
       updateMessageDraft('');
     }
@@ -47,6 +49,20 @@ export const MessageInput = ({
       )}px`;
     }
   }, [messageDraft]);
+
+  if (isCompleted) {
+    return (
+      <div className="p-4 bg-white border-t">
+        <div className="mx-auto max-w-3xl flex gap-4">
+          <div className="flex-1 bg-gray-100 rounded-md p-4 text-center flex items-center justify-center">
+            <LockIcon className="h-5 w-5 text-gray-500 mr-2" />
+            <span className="text-gray-600">This conversation is complete. Start a new chat to practice more.</span>
+          </div>
+          <div className="h-[60px] w-[60px]"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="p-4 bg-white border-t">

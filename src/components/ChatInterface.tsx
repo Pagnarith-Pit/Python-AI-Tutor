@@ -64,10 +64,9 @@ export const ChatInterface = () => {
     setConversations
   );
 
-  // isLoadingSolution never becomes false because this component never actually rerenders
-
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
   const hasMessages = activeConversation?.messages && activeConversation.messages.length > 0;
+  const isConversationCompleted = activeConversation?.isCompleted || false;
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -109,9 +108,10 @@ export const ChatInterface = () => {
             <MessageInput 
               onSend={handleSend} 
               onStop={handleStopGeneration}
-              disabled={isLoadingChat} 
+              disabled={isLoadingChat || isConversationCompleted} 
               isGenerating={isStreaming}
               conversationId={activeConversationId}
+              isCompleted={isConversationCompleted}
             />
           </>
         )}
