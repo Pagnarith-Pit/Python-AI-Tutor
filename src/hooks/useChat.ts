@@ -193,16 +193,24 @@ export const useChat = (
     setIsStreaming(true);
 
     // Check student's progress
-    const currentProgress = currentConversation.progress;
+    let currentProgress = currentConversation.progress;
     const currentCorrectAnswer = currentConversation.model_solution[currentConversation.model_solution.length - currentProgress];
     const [student_mistake, strategy] = await checkStudentProgress(updatedConversation, currentCorrectAnswer);
 
     // Check student's progress
     if (student_mistake === "CORRECT") {
-      updatedConversation.progress = currentProgress - 1;
+      // Update the local reference
+      currentProgress = currentProgress - 1;
+      
+      // Update the actual state with the new progress value
+      setConversations((prevConversations) =>
+        prevConversations.map((conv) =>
+          conv.id === conversationId
+            ? { ...conv, progress: currentProgress - 1 }
+            : conv
+        )
+      );
     }
-
-    
     
     // End Chat if student is done
     if (currentProgress === 0) {
