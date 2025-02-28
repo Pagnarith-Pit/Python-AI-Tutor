@@ -6,6 +6,7 @@ from openai import OpenAI
 import asyncio
 import threading
 import os
+import time
 from dotenv import load_dotenv
 load_dotenv('/Users/ppit/Desktop/python-pathway-project/.env.local')
 
@@ -168,17 +169,30 @@ async def generate_chat(client, input, request: Request):
 async def chat(request: ChatMessage):
     ## Prompt the AI to create the question with those inputs
         
-    PROMPT = "Create a question based on the following information: " + message.correct_answer + " and focus on the following concepts: " + message.strategy + " and the student's mistake is: " + message.student_mistake
-    message = message.message['messages']
+    PROMPT = "Create a question based on the following information: " + request.correct_answer + " and focus on the following concepts: " + request.strategy + " and the student's mistake is: " + request.student_mistake
+    message = request.message['messages']
 
     ## Must work on the prompt to make it more specific
     ## ------------------------------------------------
     # input = [{"role": "user", "content": PROMPT + " " + message}]
-    input = message + PROMPT
+    input = PROMPT
     ## ------------------------------------------------
 
     ##generator = generate_chat(client, input, request)
     generator = generate_test_input(input, request)
+
+    return EventSourceResponse(
+        generator,
+        media_type="text/event-stream",
+        ping=20000  # Send a ping every 20 seconds to keep the connection alive
+    )
+
+@app.post("/recap")
+async def recap(request: ChatMessage):
+
+    PROMPT = "Recap the stuff they have done. The lessons they have learnt. The mistakes they have made, and improvements suggestion" + request.correct_answer + " and focus on the following concepts: " + request.strategy + " and the student's mistake is: " + request.student_mistake
+
+    generator = generate_test_input(PROMPT, request)
 
     return EventSourceResponse(
         generator,
@@ -215,9 +229,9 @@ async def generate_test_input(input_data, request: Request):
 
     try:
         while True:
-            if await request.is_disconnected():
-                is_disconnected = True
-                break
+            # if await request.is_disconnected():
+            #     is_disconnected = True
+            #     break
 
             token = await queue.get()
             if token is None:

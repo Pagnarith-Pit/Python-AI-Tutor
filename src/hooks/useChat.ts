@@ -64,6 +64,47 @@ export const useChat = (
     }
   };
 
+  // Helper function to make API call
+  const fetchAIResponse = async (requestBody: string, signal: AbortSignal, conversationId: string) => {
+    const response = await fetch(`http://localhost:${process.env.NEXT_PUBLIC_FASTAPI_PORT}/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: requestBody,
+      signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) throw new Error("No reader available");
+
+    await handleStreamingResponse(reader, conversationId);
+  };
+
+  const fetchRecapResponse = async (requestBody: string, signal: AbortSignal, conversationId: string) => {
+    const response = await fetch(`http://localhost:${process.env.NEXT_PUBLIC_FASTAPI_PORT}/recap`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: requestBody,
+          signal,
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error for Recap! status: ${response.status}`);
+        }
+
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error("No reader available");
+
+        await handleStreamingResponse(reader, conversationId);
+      };
+
   const handleStopGeneration = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -105,7 +146,7 @@ export const useChat = (
   };
 
   // Helper function to check student's progress
-  const checkStudentProgress = async (conversation: any, correctAnswer: string) => {
+  const checkStudentProgress = async (conversation: any, correctAnswer: any) => {
     return await handleCheckResponse(conversation, correctAnswer);
   };
 
@@ -153,27 +194,6 @@ export const useChat = (
     }
   };
 
-  // Helper function to make API call
-  const fetchAIResponse = async (requestBody: string, signal: AbortSignal, conversationId: string) => {
-    const response = await fetch(`http://localhost:${process.env.NEXT_PUBLIC_FASTAPI_PORT}/chat`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: requestBody,
-      signal,
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const reader = response.body?.getReader();
-    if (!reader) throw new Error("No reader available");
-
-    await handleStreamingResponse(reader, conversationId);
-  };
-
   // Function to add congratulatory message when student completes all tasks
   const addCongratulationsMessage = (conversationId: string) => {
     const congratsMessage: Message = { 
@@ -197,7 +217,7 @@ export const useChat = (
   const handleSendMessage = async (content: string) => {
     const conversationId = activeConversationId;
     const userMessage: Message = { role: "user", content };
-    const assistantMessage: Message = { role: "assistant", content: "" };
+    const assistantMessage: Message = { role: "assistant", content: "Please Wait" };
 
     // Prepare conversation update
     const conversationData = prepareConversationUpdate(conversationId, userMessage);
@@ -214,15 +234,15 @@ export const useChat = (
 
     // Check student's progress
     let currentProgress = currentConversation.progress;
-    const currentCorrectAnswer = currentConversation.model_solution[currentConversation.model_solution.length - currentProgress];
-
-    console.log(currentConversation.model_solution);
-    console.log("Current Correct Answer in UseChat:", currentCorrectAnswer);
+    const modelSolutionArray = Object.values(currentConversation.model_solution);
+    const currentCorrectAnswer = modelSolutionArray[modelSolutionArray.length - currentProgress];
 
     const data = await checkStudentProgress(updatedConversation, currentCorrectAnswer);
-    
+    const student_mistake = data[0]
+    const strategy = data[1]
+
     // Check if student's answer is correct
-    if (data && data.student_mistake === "CORRECT") {
+    if (student_mistake === "CORRECT") {
       // Update the progress by decrementing it
       currentProgress = currentProgress - 1;
       
@@ -237,10 +257,20 @@ export const useChat = (
     }
     
     // End Chat if student is done (progress = 0)
-    if (currentProgress === 0) {
+    if (currentProgress === 0) { 
         setIsLoadingChat(false);
         setIsStreaming(false);
-        
+
+        // Sumarise the conversation
+        const requestBodyRecap = JSON.stringify({
+          message: updatedConversation,
+          correct_answer: currentCorrectAnswer,
+          strategy: strategy,
+          student_mistake: student_mistake
+        });
+
+        fetchRecapResponse(requestBodyRecap, new AbortController().signal, conversationId);
+  
         // Add congratulatory message
         addCongratulationsMessage(conversationId);
 
@@ -261,8 +291,8 @@ export const useChat = (
       const requestBody = JSON.stringify({
         message: updatedConversation,
         correct_answer: currentCorrectAnswer,
-        strategy: data.strategy,
-        student_mistake: data.student_mistake
+        strategy: strategy,
+        student_mistake: student_mistake
       });
 
       await fetchAIResponse(requestBody, signal, conversationId);
@@ -301,3 +331,4 @@ export const useChat = (
     handleStopGeneration
   };
 };
+
