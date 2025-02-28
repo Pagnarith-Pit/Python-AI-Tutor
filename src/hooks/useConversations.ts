@@ -98,7 +98,7 @@ export const useConversations = () => {
       messages: [],
       model_think: '',
       model_solution: '',
-      progress: 0
+      progress: -1
     };
 
     setConversations((prev) => [...prev, newConversation]);

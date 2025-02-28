@@ -187,7 +187,6 @@ export const useChat = (
           ? { 
               ...conv, 
               messages: [...conv.messages, congratsMessage],
-              isCompleted: true // Mark conversation as completed
             }
           : conv
       )
@@ -205,16 +204,6 @@ export const useChat = (
     if (!conversationData) return;
     
     const { currentConversation, updatedConversation } = conversationData;
-
-    // If conversation is already completed, don't allow more messages
-    if (currentConversation.isCompleted) {
-      toast({
-        title: "Chat Completed",
-        description: "This learning session has been completed. Please start a new chat for more practice.",
-        variant: "default",
-      });
-      return;
-    }
 
     // Update conversations state
     updateConversationsWithMessages(conversationId, userMessage, assistantMessage);
@@ -245,13 +234,19 @@ export const useChat = (
     
     // End Chat if student is done (progress = 0)
     if (currentProgress === 0) {
-      setIsLoadingChat(false);
-      setIsStreaming(false);
-      
-      // Add congratulatory message
-      addCongratulationsMessage(conversationId);
-      
-      return;
+        setIsLoadingChat(false);
+        setIsStreaming(false);
+        
+        // Add congratulatory message
+        addCongratulationsMessage(conversationId);
+
+        toast({
+          title: "Chat Completed",
+          description: "This learning session has been completed. Please start a new chat for more practice.",
+          variant: "default",
+        });
+        
+        return;
     }
 
     try {

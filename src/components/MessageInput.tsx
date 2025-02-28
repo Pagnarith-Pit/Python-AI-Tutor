@@ -56,7 +56,7 @@ export const MessageInput = ({
         <div className="mx-auto max-w-3xl flex gap-4">
           <div className="flex-1 bg-gray-100 rounded-md p-4 text-center flex items-center justify-center">
             <LockIcon className="h-5 w-5 text-gray-500 mr-2" />
-            <span className="text-gray-600">This conversation is complete. Start a new chat to practice more.</span>
+            <span className="text-gray-600">Want some more challenge? Start a New Chat.</span>
           </div>
           <div className="h-[60px] w-[60px]"></div>
         </div>

@@ -66,7 +66,7 @@ export const ChatInterface = () => {
 
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
   const hasMessages = activeConversation?.messages && activeConversation.messages.length > 0;
-  const isConversationCompleted = activeConversation?.isCompleted || false;
+  const isConversationCompleted = activeConversation?.progress == 0;
 
   return (
     <div className="flex h-screen bg-gray-50">
