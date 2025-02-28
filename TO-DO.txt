@@ -17,13 +17,13 @@ as reverse proxy to
 8) Expanded Progress: DONE
 9) Sign Out: DONE
 10) Move supabase from hosting to local through Docker: DONE
+11) Display well done image at the end and disable chat: DONE
 ##########################
 
 
 ##### TO BE DONE ########
 ** App Related:
 4) Contact Us Page : send information to backend to receive email
-5) Display well done image at the end and disable chat
 6) Loading Screen is not working
 7) If students exit before completing, handle reload and get back to same checkpoint: depends on whose turn was last
 Student exit before model COMPLETED
