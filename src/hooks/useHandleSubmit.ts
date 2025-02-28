@@ -71,12 +71,14 @@ export const useHandleSubmit = (
       const data = await response.json();
       const model_reasoning = data.model_reasoning;
       const model_answer = data.response;
+      const startingProgress = data.response.length;
 
+      console.log(data)
       // Create assistant message
-      const assistantMessage = {
-        role: 'assistant' as const,
-        content: model_answer
-      };
+      // const assistantMessage = {
+      //   role: 'assistant' as const,
+      //   content: model_answer
+      // };
 
       // Update conversations with both messages
       setConversations((prevConversations) => {
@@ -84,14 +86,16 @@ export const useHandleSubmit = (
           if (conv.id === activeConversationId) {
             return {
               ...conv,
-              messages: [initialMessage, assistantMessage],
               model_solution: model_answer,
-              model_think: model_reasoning
+              model_think: model_reasoning,
+              progress: startingProgress
             };
           }
           return conv;
         });
       });
+
+      console.log(startingProgress)
 
       // Reset form after successful submission
       setFormData({ concept: '', problemDesc: '' });
@@ -99,7 +103,7 @@ export const useHandleSubmit = (
       setIsSubmitted(true);
 
       // Save to database
-      await saveConversations(activeConversationId, userId, model_reasoning, model_answer);
+      await saveConversations(activeConversationId, userId, model_reasoning, model_answer, startingProgress);
 
 
     } catch (error) {

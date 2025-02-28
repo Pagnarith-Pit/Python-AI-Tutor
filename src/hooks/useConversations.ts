@@ -126,7 +126,7 @@ export const useConversations = () => {
 export const useSaveConversations = () => {
   const { toast } = useToast();
 
-  const saveConversations = async (activeConversationId: string, userId: string, model_reasoning: string, model_answer: string) => {
+  const saveConversations = async (activeConversationId: string, userId: string, model_reasoning: string, model_answer: string, progress: number) => {
     try {
       const { error } = await supabase
         .from('conversations')
@@ -135,7 +135,7 @@ export const useSaveConversations = () => {
           user_id: userId,
           model_think: model_reasoning,
           model_solution: model_answer,
-          progress: 0,
+          progress: progress,
           created_at: new Date().toISOString(),
         });
 

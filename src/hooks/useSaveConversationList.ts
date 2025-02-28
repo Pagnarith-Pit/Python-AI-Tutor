@@ -14,15 +14,15 @@ export const useSaveConversationList = (conversations: any[], userId: string) =>
     if (!userId) return;
 
     // santiize the conversations to maintain the created_at date
-    const sanitizedConversations = conversations.map(({ created_at, ...rest }) => ({
-      ...rest,
+    const sanitizedConversations = conversations.map((conv) => ({
+      id: conv.id,
       user_id: userId,
+      messages: conv.messages,
+      progress: conv.progress || 0,  // Use the item's progress or default to 0
+      model_think: conv.model_think || '',
+      model_solution: conv.model_solution || '',
       updated_at: new Date().toISOString()
     }));
-    
-    const { error } = await supabase
-      .from('conversations')
-      .upsert(sanitizedConversations);
 
     try {
       const { error } = await supabase

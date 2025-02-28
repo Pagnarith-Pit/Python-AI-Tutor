@@ -25,6 +25,9 @@ as reverse proxy to
 4) Contact Us Page : send information to backend to receive email
 5) Display well done image at the end and disable chat
 6) Loading Screen is not working
+7) If students exit before completing, handle reload and get back to same checkpoint: depends on whose turn was last
+Student exit before model COMPLETED
+Or student exit after model COMPLETED
 
 ** AI Tutor Related:
 3) Progress Graph in DIV section

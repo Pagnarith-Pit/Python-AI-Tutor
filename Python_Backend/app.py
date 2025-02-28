@@ -74,7 +74,7 @@ async def create_Solution(message: ChatMessage):
 
     ## DUMMY TEST
     AI_think = """This is a model think dummy"""
-    AI_answer = """{Step 1: First step, Step 2: Second step, Step 3: Third step}"""
+    AI_answer = {"Step 1": "First step", "Step 2": "Second step", "Step 3": "Third step"}
     
     return {"model_reasoning": AI_think, "response": AI_answer}
 

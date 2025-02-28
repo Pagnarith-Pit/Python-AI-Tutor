@@ -11,6 +11,9 @@ interface Conversation {
     role: "user" | "assistant";
     content: string;
   }>;
+  progress: number; // Add this property
+  model_think?: string; // Add this if needed
+  model_solution?: string; // Add this if needed
 }
 
 interface ConversationListProps {
