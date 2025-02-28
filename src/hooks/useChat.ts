@@ -28,6 +28,41 @@ export const useChat = (
   const abortControllerRef = useRef<AbortController | null>(null);
   const accumulatedContentRef = useRef("");
 
+  // This function will be used to check the response from the AI server
+  // Output: { student_mistake: string, strategy: string }
+  const handleCheckResponse = async (messageHistory: any, correctAnswer: string) => {
+    const requestBody = JSON.stringify({
+      message: messageHistory,
+      correct_answer: correctAnswer,
+    });
+
+    try {
+      const response = await fetch(`http://localhost:${process.env.NEXT_PUBLIC_FASTAPI_PORT}/checkResponse`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: requestBody,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error in Check Response! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return data;
+
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error checking response:", error);
+        toast({
+          title: "Error",
+          description: "Failed to check response",
+          variant: "destructive",
+        });
+  }
+}
+
   const handleStopGeneration = () => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -64,6 +99,12 @@ export const useChat = (
 
     setIsLoadingChat(true);
     setIsStreaming(true);
+
+    // checking the response of student's
+    // 1) Check student's progress
+    const progress = currentConversation.progress;
+
+    const [student_mistake, strategy] = await handleCheckResponse(updatedConversation, currentConversation.model_solution);
 
     try {
       abortControllerRef.current = new AbortController();
@@ -158,4 +199,5 @@ export const useChat = (
     handleSendMessage,
     handleStopGeneration
   };
+};
 };

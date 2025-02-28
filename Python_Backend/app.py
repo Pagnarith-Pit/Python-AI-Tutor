@@ -27,6 +27,10 @@ app.add_middleware(
 class ChatMessage(BaseModel):
     message: dict
 
+class checkResponse(BaseModel):
+    message: dict
+    correct_answer: str
+
 def createClient(api_key):
     client = OpenAI(
         base_url = os.environ.get("INSTANCE_HOST"),
@@ -58,31 +62,41 @@ async def generate_solution(client, message: ChatMessage):
 
 @app.post("/createSolution")
 async def create_Solution(message: ChatMessage):
-    AI_response = await generate_solution(client, message)
+    # AI_response = await generate_solution(client, message)
     ## Uncomment to switch to the thinking model
     # AI_response = AI_response.content.split("</think>")
     # AI_think = AI_response[0]
     # AI_answer = AI_response[1]
     
     ## ONLY A TEST
-    AI_answer = AI_response.content
-    AI_think = "This is the thinking model"
+    # AI_answer = AI_response.content
+    # AI_think = "This is the thinking model"
+
+    ## DUMMY TEST
+    AI_think = """This is a model think dummy"""
+    AI_answer = """{Step 1: First step, Step 2: Second step, Step 3: Third step}"""
     
-    print(AI_response)
     return {"model_reasoning": AI_think, "response": AI_answer}
 
 # Creating Solution from Thinking Model
-async def check_response(client, message: ChatMessage, correct_answer: str):
-    input = "Add prompt for AI to consider whether student is right or wrong. If wrong, generate why student is wrong and strategy to use. If right, generate correct message and reflection, and strategy is 'START'"
+@app.post("/checkResponse")
+async def check_response(request: checkResponse):
+    message = request.message
+    correct_answer = request.correct_answer
+    
+    input = "Add prompt for AI to consider whether student is right or wrong. If wrong, generate why student is wrong and strategy to use. If right, generate CORRECT and reflection, and strategy is 'START'"
+    input = "Analyse the student's previous conversation. Is their last respond answering the question correctly? Refer to the correct answer argument for the correct answer."
+
     ## Format the solution to {student_mistake: text, strategy: text}
-    AI_response = await generate_solution(client, input)
-    AI_response = AI_response.content.split("</think>")
-    # AI_think = AI_response[0]
-    AI_answer = AI_response[1]
+    # AI_response = await generate_solution(client, input)
+    # AI_response = AI_response.content.split("</think>")
+    # # AI_think = AI_response[0]
+    # AI_answer = AI_response[1]
+
 
     # Extract the student mistake and strategy 
     # ------------------------------
-    student_mistake = "Why student is wrong"
+    student_mistake = "CORRECT"
     strategy = "What strategy to use"
     # ------------------------------
 
@@ -143,14 +157,13 @@ async def generate_chat(client, input, request: Request):
             print("Cleaning up worker thread")
 
 
+## Arguments for message: messages, correct_answer, student_mistake, strategy
 @app.post("/chat")
-async def chat(request: Request, message: ChatMessage, correct_answer: str = "", strategy: str = "", student_mistake: str = ""):
+async def chat(request: Request, message: ChatMessage):
     ## Prompt the AI to create the question with those inputs
 
-    if student_mistake == "CORRECT":
-        student_mistake = "The student's answer is correct. Congratulate them and move on to the next question."
         
-    PROMPT = "Create a question based on the following information: " + correct_answer + " and focus on the following concepts: " + strategy + " and the student's mistake is: " + student_mistake
+    PROMPT = "Create a question based on the following information: " + message.correct_answer + " and focus on the following concepts: " + message.strategy + " and the student's mistake is: " + message.student_mistake
     message = message.message['messages']
 
     ## Must work on the prompt to make it more specific
