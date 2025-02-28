@@ -198,7 +198,7 @@ export const useChat = (
   const addCongratulationsMessage = (conversationId: string) => {
     const congratsMessage: Message = { 
       role: "assistant", 
-      content: "Congratulation. You've Done Very Well" 
+      content: "Congratulation. Hope You Enjoyed The Lessons." 
     };
 
     setConversations((prevConversations) =>
@@ -269,7 +269,7 @@ export const useChat = (
           student_mistake: student_mistake
         });
 
-        fetchRecapResponse(requestBodyRecap, new AbortController().signal, conversationId);
+        await fetchRecapResponse(requestBodyRecap, new AbortController().signal, conversationId);
   
         // Add congratulatory message
         addCongratulationsMessage(conversationId);

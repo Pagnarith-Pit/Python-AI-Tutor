@@ -60,7 +60,7 @@ const customStyle = {
 
 // Check if the message is a congratulation message
 const isCongratulationMessage = (content: string): boolean => {
-  return content.includes("Congratulation. You've Done Very Well");
+  return content.includes("Congratulation. Hope You Enjoyed The Lessons.");
 };
 
 export const Message = ({ content, role, isLoadingSolution, isLastMessage, isGenerating, isFirstMessage }: MessageProps) => {
@@ -128,7 +128,7 @@ export const Message = ({ content, role, isLoadingSolution, isLastMessage, isGen
             {content} 🎉
           </h2>
           <p className="text-gray-700 mb-4">
-            You have successfully completed all the challenges. Great job!
+            You have successfully completed all the challenges. Ready for more?
           </p>
           <div className="flex justify-center mt-4">
             <div className="w-40 h-40 bg-gradient-to-b from-yellow-300 to-yellow-500 rounded-full flex items-center justify-center shadow-lg">
