@@ -1,9 +1,19 @@
 import { MessageCircle, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { useDeleteConversation } from "@/hooks/useDeleteConversation";
 import { useSaveConversationList } from "@/hooks/useSaveConversationList";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
 
 interface Conversation {
   id: string;
@@ -11,9 +21,9 @@ interface Conversation {
     role: "user" | "assistant";
     content: string;
   }>;
-  progress: number; // Add this property
-  model_think?: string; // Add this if needed
-  model_solution?: string; // Add this if needed
+  progress: number; 
+  model_think?: string;
+  model_solution?: string;
 }
 
 interface ConversationListProps {
@@ -24,14 +34,6 @@ interface ConversationListProps {
   onNewChat: () => void;
   user: { id: string };
 }
-
-/**
- * ConversationList component:
- * - Displays a list of conversations.
- * - Parent: ChatInterface
- * - Children: None
- * - Calls: useDeleteConversation, useSaveConversationList
- */
 
 export const ConversationList = ({
   conversations,
@@ -44,6 +46,7 @@ export const ConversationList = ({
   const conversationsRef = useRef(conversations);
   const { deleteConversation } = useDeleteConversation();
   const { saveConversations } = useSaveConversationList(conversations, user.id);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     conversationsRef.current = conversations;
@@ -59,8 +62,44 @@ export const ConversationList = ({
     }
   }, [conversations, user]);
 
+  const handleDeleteClick = (e: React.MouseEvent, conversationId: string) => {
+    e.stopPropagation();
+    setPendingDeleteId(conversationId);
+  };
+
+  const handleConfirmDelete = () => {
+    if (pendingDeleteId) {
+      deleteConversation(pendingDeleteId, user.id, onDelete);
+      setPendingDeleteId(null);
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setPendingDeleteId(null);
+  };
+
   return (
     <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
+      <AlertDialog open={pendingDeleteId !== null} onOpenChange={handleCancelDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Conversation</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this conversation and all its messages. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmDelete}
+              className="bg-red-500 text-white hover:bg-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="p-4">
         <Button
           variant="outline"
@@ -93,10 +132,7 @@ export const ConversationList = ({
                   <div className="truncate text-sm text-gray-600">{preview}</div>
                 </div>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteConversation(conversation.id, user.id, onDelete);
-                  }}
+                  onClick={(e) => handleDeleteClick(e, conversation.id)}
                   className="absolute right-4 top-1/2 transform -translate-y-1/2 text-red-500 hover:text-red-700"
                 >
                   <Trash2 className="h-4 w-4" />
