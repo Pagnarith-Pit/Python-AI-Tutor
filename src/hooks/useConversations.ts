@@ -66,11 +66,14 @@ export const useConversations = () => {
   const removeConversation = (id: string) => {
     setConversations((prevConversations) => {
       const updated = prevConversations.filter((conv) => conv.id !== id);
+
       if (activeConversationId === id) {
         if (updated.length > 0) {
           setActiveConversationId(updated[0].id);
-        } else {
-          const newConversation = { id: uuidv4(), messages: [], model_think: '', model_solution: '', progress: 0 };
+        } 
+        
+        else {
+          const newConversation = { id: uuidv4(), messages: [], model_think: '', model_solution: '', progress: -1 };
           setActiveConversationId(newConversation.id);
           return [newConversation];
         }

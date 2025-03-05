@@ -67,6 +67,8 @@ export const Message = ({ content, role, isLoadingSolution, isLastMessage, isGen
   const isUser = role === "user";
   const isCongratsMessage = !isUser && isCongratulationMessage(content);
 
+  {console.log("Loading solution inside Message", isLoadingSolution)}
+
   // Parse the content if it's the first message to extract concept and problem description
   const renderFirstMessage = () => {
     try {

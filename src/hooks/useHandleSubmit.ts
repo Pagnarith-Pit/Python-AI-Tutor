@@ -20,7 +20,7 @@ export const useHandleSubmit = (
   const { toast } = useToast();
   const { saveConversations } = useSaveConversations();
   const [isLoading, setIsLoading] = useState(false);
-  const isLoadingSolution = useRef(false);
+  const [isLoadingSolution, setIsLoadingSolution] = useState(false);
   const [formData, setFormData] = useState({
     concept: '',
     problemDesc: '',
@@ -49,8 +49,7 @@ export const useHandleSubmit = (
         });
       });
 
-      // setIsLoading(true);
-      isLoadingSolution.current = true;
+      setIsLoadingSolution(true);
 
       const response = await fetch(`http://localhost:${process.env.NEXT_PUBLIC_FASTAPI_PORT}/createSolution`, {
         method: 'POST',
@@ -105,8 +104,7 @@ export const useHandleSubmit = (
         variant: "destructive",
       });
     } finally {
-      isLoadingSolution.current = false
-      // setIsLoading(false);
+      setIsLoadingSolution(false);
     }
   };
 

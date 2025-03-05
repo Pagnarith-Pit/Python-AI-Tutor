@@ -23,6 +23,8 @@ interface MessageListProps {
 export const MessageList = ({ messages, isLoadingChat, isLoadingSolution }: MessageListProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  console.log("Inside MessageList: ", isLoadingSolution)
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoadingChat, isLoadingSolution]);

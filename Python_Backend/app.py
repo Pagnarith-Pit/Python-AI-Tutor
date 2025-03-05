@@ -80,6 +80,8 @@ async def create_Solution(message: FormMessage):
     # AI_think = "This is the thinking model"
 
     ## DUMMY TEST
+    ## Simulate waiting for the AI to think
+    time.sleep(10)
     AI_think = """This is a model think dummy"""
     AI_answer = {"Step 1": "First step", "Step 2": "Second step", "Step 3": "Third step"}
     

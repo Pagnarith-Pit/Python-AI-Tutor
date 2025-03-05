@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
@@ -40,10 +39,17 @@ export const ChatInterface = () => {
     }
   }, [user]);
 
-  const handleSend = (message: string) => {
-    setActiveChat(activeConversationId);
-    handleSendMessage(message);
+  // Extract common function to ensure active chat is set
+  const ensureActiveChat = <T extends (...args: any[]) => any>(callback: T) => {
+    return (...args: Parameters<T>): ReturnType<T> => {
+      setActiveChat(activeConversationId);
+      return callback(...args);
+    };
   };
+
+  const handleSend = ensureActiveChat((message: string) => {
+    handleSendMessage(message);
+  });
 
   if (authLoading) {
     return (
@@ -57,12 +63,24 @@ export const ChatInterface = () => {
     return <LoginForm />;
   }
 
-  const { formData, handleSubmit, handleChange, isLoading, isLoadingSolution } = useHandleSubmit(
+  const { 
+    formData, 
+    handleSubmit: originalHandleSubmit, 
+    handleChange, 
+    isLoading, 
+    isLoadingSolution 
+  } = useHandleSubmit(
     activeConversationId,
     user?.id,
     setProblemFormSubmitted,
     setConversations
   );
+
+  // Wrap the original handleSubmit with the ensureActiveChat function
+  const handleSubmit = ensureActiveChat(originalHandleSubmit);
+
+  // After createSolution, it never became false
+  console.log("Active Conversation: ", activeConversationId)
 
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
   const hasMessages = activeConversation?.messages && activeConversation.messages.length > 0;
@@ -103,7 +121,7 @@ export const ChatInterface = () => {
             <MessageList 
               messages={activeConversation.messages} 
               isLoadingChat={isLoadingChat && activeChat === activeConversationId} 
-              isLoadingSolution={isLoadingSolution && false && activeChat === activeConversationId}
+              isLoadingSolution={isLoadingSolution && activeChat === activeConversationId}
             />
             <MessageInput 
               onSend={handleSend} 

@@ -22,6 +22,10 @@ as reverse proxy to
 
 
 ##### TO BE DONE ########
+** BUGS
+1) Active Conversation ID loads twice
+2) IsLoadingSolution never became false
+
 ** App Related:
 4) Contact Us Page : send information to backend to receive email
 6) Loading Screen is not working
