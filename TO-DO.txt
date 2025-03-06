@@ -25,7 +25,8 @@ as reverse proxy to
 ** BUGS
 
 ** App Related:
-4) Contact Us Page : send information to backend to receive email
+4) Contact Us Page : Requires Testing
+
 7) If students exit before completing, handle reload and get back to same checkpoint: depends on whose turn was last
 Student exit before model COMPLETED
 Or student exit after model COMPLETED

@@ -3,6 +3,7 @@
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
   "/contact": "pages/contact.js",
+  "/api/send-email": "pages/api/send-email.js",
   "/login": "pages/login.js",
   "/": "pages/index.js"
 }
