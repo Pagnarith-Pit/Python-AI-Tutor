@@ -2,6 +2,7 @@
 2) Host supabase and NextJS as separate container with bridge network, and NGINX
 as reverse proxy to 
 3) The AI tutor should also be a container, such that when it fails, it spins back up
+4) We could use Answer Sheet as ground truth. Then using THink Model, we can ask it to break it down into steps
 ##########################
 
 
@@ -35,6 +36,7 @@ Or student exit after model COMPLETED
 3) Progress Graph in DIV section
 - use UseChat hook to get conversations.solution, then find current active solution = model_solution[progress]
 - Based on this conversation, create a tree and send message to AI
+4) Add different AI tutor features: solution checking vs full problem (current implementation)
 ##########################
 
 
