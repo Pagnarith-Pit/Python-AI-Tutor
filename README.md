@@ -9,4 +9,5 @@ University students to start with, but we hope to move beyond that, making it pu
 # Stage
 Experimental. Please provide feedback as it is much appreciated.
 
-
+# AI Usage
+Developed with the help of Loveable, Claude Sonnet 3.7, and GPT4.0
